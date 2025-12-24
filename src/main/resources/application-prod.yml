@@ -4,12 +4,12 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://postgres.railway.internal:5432/railway
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
     username: ${PGUSER}
     password: ${PGPASSWORD}
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
     hibernate:
       ddl-auto: update
