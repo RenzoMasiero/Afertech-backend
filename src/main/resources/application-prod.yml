@@ -4,7 +4,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:${DATABASE_URL}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
