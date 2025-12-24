@@ -1,9 +1,15 @@
 package com.facturacion.Afertech.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "invoices")
 public class Invoice {
@@ -12,57 +18,42 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Empresa emisora
     @Column(nullable = false)
-    private String number;
+    private String company;
+
+    // Número de factura
+    @Column(nullable = false)
+    private String invoiceNumber;
+
+    // Fecha de la factura (del comprobante)
+    @Column(nullable = false)
+    private LocalDate issueDate;
+
+    // Fecha de carga en el sistema (automática)
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    private String description;
 
     @Column(nullable = false)
-    private String customerName;
+    private BigDecimal totalWithoutTax;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private BigDecimal totalWithTax;
 
-    @Column(nullable = false)
-    private BigDecimal total;
+    private Integer deferredPaymentDays;
 
-    // ===== getters & setters =====
+    private String projectNumber;
 
-    public Long getId() {
-        return id;
-    }
+    private String purchaseOrder;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Integer purchaseOrderPercentage;
 
-    public String getNumber() {
-        return number;
-    }
+    private String paymentOrder;
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

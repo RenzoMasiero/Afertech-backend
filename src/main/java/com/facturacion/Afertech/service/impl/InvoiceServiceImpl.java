@@ -14,43 +14,43 @@ import java.util.List;
 public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository repository;
+    private final InvoiceMapper mapper;
 
-    public InvoiceServiceImpl(InvoiceRepository repository) {
+    public InvoiceServiceImpl(InvoiceRepository repository, InvoiceMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<InvoiceResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(InvoiceMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public InvoiceResponse findById(Long id) {
         Invoice invoice = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
-        return InvoiceMapper.toResponse(invoice);
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        return mapper.toResponse(invoice);
     }
 
     @Override
     public InvoiceResponse create(InvoiceRequest request) {
-        Invoice invoice = InvoiceMapper.toEntity(request);
-        return InvoiceMapper.toResponse(repository.save(invoice));
+        Invoice invoice = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(invoice));
     }
 
     @Override
     public InvoiceResponse update(Long id, InvoiceRequest request) {
         Invoice invoice = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        invoice.setNumber(request.getNumber());
-        invoice.setCustomerName(request.getCustomerName());
-        invoice.setDate(request.getDate());
-        invoice.setTotal(request.getTotal());
+        Invoice updated = mapper.toEntity(request);
+        updated.setId(invoice.getId());
 
-        return InvoiceMapper.toResponse(repository.save(invoice));
+        return mapper.toResponse(repository.save(updated));
     }
 
     @Override

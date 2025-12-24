@@ -46,3 +46,8 @@ logs/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+
+# Local DB & artifacts
+data/
+src.zip
