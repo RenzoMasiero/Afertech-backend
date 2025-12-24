@@ -4,7 +4,9 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:${DATABASE_URL}
+    url: jdbc:postgresql://postgres.railway.internal:5432/railway
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
