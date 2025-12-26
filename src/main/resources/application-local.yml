@@ -19,3 +19,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+jwt:
+  # 🔴 IMPORTANTE:
+  # Debe tener AL MENOS 32 caracteres (256 bits) para HS256
+  secret: local-dev-secret-12345678901234567890

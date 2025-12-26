@@ -6,9 +6,9 @@ import com.facturacion.Afertech.mapper.InvoiceMapper;
 import com.facturacion.Afertech.model.Invoice;
 import com.facturacion.Afertech.repository.InvoiceRepository;
 import com.facturacion.Afertech.service.InvoiceService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -22,11 +22,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<InvoiceResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
