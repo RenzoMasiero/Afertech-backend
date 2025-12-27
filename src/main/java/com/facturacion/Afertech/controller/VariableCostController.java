@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.VariableCostRequest;
 import com.facturacion.Afertech.dto.VariableCostResponse;
 import com.facturacion.Afertech.service.VariableCostService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +31,18 @@ public class VariableCostController {
     }
 
     @PostMapping
-    public ResponseEntity<VariableCostResponse> create(@RequestBody VariableCostRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<VariableCostResponse> create(
+            @Valid @RequestBody VariableCostRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.create(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<VariableCostResponse> update(
             @PathVariable Long id,
-            @RequestBody VariableCostRequest request
+            @Valid @RequestBody VariableCostRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

@@ -1,44 +1,30 @@
 package com.facturacion.Afertech.dto;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class FixedCostRequest {
 
+    @NotNull
     private Long costTypeId;
-    private String description;
+
+    @NotNull
     private BigDecimal amount;
-    private LocalDate date;
 
-    public Long getCostTypeId() {
-        return costTypeId;
-    }
+    // Mes al que se imputa el costo (ej: 2025-01-01)
+    @NotNull
+    private LocalDate allocationMonth;
 
-    public void setCostTypeId(Long costTypeId) {
-        this.costTypeId = costTypeId;
-    }
+    // Fecha real de pago
+    @NotNull
+    private LocalDate paymentDate;
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    private String description;
 }
+

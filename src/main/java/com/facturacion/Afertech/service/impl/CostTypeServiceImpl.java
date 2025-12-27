@@ -14,43 +14,48 @@ import java.util.List;
 public class CostTypeServiceImpl implements CostTypeService {
 
     private final CostTypeRepository repository;
+    private final CostTypeMapper mapper;
 
-    public CostTypeServiceImpl(CostTypeRepository repository) {
+    public CostTypeServiceImpl(CostTypeRepository repository, CostTypeMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<CostTypeResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(CostTypeMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public CostTypeResponse findById(Long id) {
-        CostType type = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("CostType not found"));
-        return CostTypeMapper.toResponse(type);
+        CostType costType = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cost type not found"));
+        return mapper.toResponse(costType);
     }
 
     @Override
     public CostTypeResponse create(CostTypeRequest request) {
-        CostType type = CostTypeMapper.toEntity(request);
-        return CostTypeMapper.toResponse(repository.save(type));
+        CostType costType = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(costType));
     }
 
     @Override
     public CostTypeResponse update(Long id, CostTypeRequest request) {
-        CostType type = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("CostType not found"));
+        CostType costType = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
-        type.setName(request.getName());
-        return CostTypeMapper.toResponse(repository.save(type));
+        costType.setName(request.getName());
+        return mapper.toResponse(repository.save(costType));
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        CostType costType = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cost type not found"));
+        repository.delete(costType);
     }
 }
+

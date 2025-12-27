@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.FixedCostRequest;
 import com.facturacion.Afertech.dto.FixedCostResponse;
 import com.facturacion.Afertech.service.FixedCostService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +31,18 @@ public class FixedCostController {
     }
 
     @PostMapping
-    public ResponseEntity<FixedCostResponse> create(@RequestBody FixedCostRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<FixedCostResponse> create(
+            @Valid @RequestBody FixedCostRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.create(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FixedCostResponse> update(
             @PathVariable Long id,
-            @RequestBody FixedCostRequest request
+            @Valid @RequestBody FixedCostRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

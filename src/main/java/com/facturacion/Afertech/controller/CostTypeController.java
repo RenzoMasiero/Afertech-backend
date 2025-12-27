@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.CostTypeRequest;
 import com.facturacion.Afertech.dto.CostTypeResponse;
 import com.facturacion.Afertech.service.CostTypeService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +31,18 @@ public class CostTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<CostTypeResponse> create(@RequestBody CostTypeRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<CostTypeResponse> create(
+            @Valid @RequestBody CostTypeRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.create(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CostTypeResponse> update(
             @PathVariable Long id,
-            @RequestBody CostTypeRequest request
+            @Valid @RequestBody CostTypeRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

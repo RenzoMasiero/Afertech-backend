@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.ProjectRequest;
 import com.facturacion.Afertech.dto.ProjectResponse;
 import com.facturacion.Afertech.service.ProjectService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +31,17 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<ProjectResponse> create(@RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<ProjectResponse> create(
+            @Valid @RequestBody ProjectRequest request
+    ) {
+        ProjectResponse response = service.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponse> update(
             @PathVariable Long id,
-            @RequestBody ProjectRequest request
+            @Valid @RequestBody ProjectRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

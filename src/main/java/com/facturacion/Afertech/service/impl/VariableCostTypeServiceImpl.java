@@ -14,43 +14,50 @@ import java.util.List;
 public class VariableCostTypeServiceImpl implements VariableCostTypeService {
 
     private final VariableCostTypeRepository repository;
+    private final VariableCostTypeMapper mapper;
 
-    public VariableCostTypeServiceImpl(VariableCostTypeRepository repository) {
+    public VariableCostTypeServiceImpl(
+            VariableCostTypeRepository repository,
+            VariableCostTypeMapper mapper
+    ) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<VariableCostTypeResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(VariableCostTypeMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public VariableCostTypeResponse findById(Long id) {
         VariableCostType type = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("VariableCostType not found"));
-        return VariableCostTypeMapper.toResponse(type);
+                .orElseThrow(() -> new RuntimeException("Variable cost type not found"));
+        return mapper.toResponse(type);
     }
 
     @Override
     public VariableCostTypeResponse create(VariableCostTypeRequest request) {
-        VariableCostType type = VariableCostTypeMapper.toEntity(request);
-        return VariableCostTypeMapper.toResponse(repository.save(type));
+        VariableCostType type = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(type));
     }
 
     @Override
     public VariableCostTypeResponse update(Long id, VariableCostTypeRequest request) {
         VariableCostType type = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("VariableCostType not found"));
+                .orElseThrow(() -> new RuntimeException("Variable cost type not found"));
 
         type.setName(request.getName());
-        return VariableCostTypeMapper.toResponse(repository.save(type));
+        return mapper.toResponse(repository.save(type));
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        VariableCostType type = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Variable cost type not found"));
+        repository.delete(type);
     }
 }

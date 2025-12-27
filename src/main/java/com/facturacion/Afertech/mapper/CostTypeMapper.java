@@ -3,19 +3,12 @@ package com.facturacion.Afertech.mapper;
 import com.facturacion.Afertech.dto.CostTypeRequest;
 import com.facturacion.Afertech.dto.CostTypeResponse;
 import com.facturacion.Afertech.model.CostType;
+import org.mapstruct.Mapper;
 
-public class CostTypeMapper {
+@Mapper(componentModel = "spring")
+public interface CostTypeMapper {
 
-    public static CostType toEntity(CostTypeRequest request) {
-        CostType type = new CostType();
-        type.setName(request.getName());
-        return type;
-    }
+    CostType toEntity(CostTypeRequest request);
 
-    public static CostTypeResponse toResponse(CostType type) {
-        CostTypeResponse response = new CostTypeResponse();
-        response.setId(type.getId());
-        response.setName(type.getName());
-        return response;
-    }
+    CostTypeResponse toResponse(CostType costType);
 }

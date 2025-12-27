@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.PaymentOrderRequest;
 import com.facturacion.Afertech.dto.PaymentOrderResponse;
 import com.facturacion.Afertech.service.PaymentOrderService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,15 +32,16 @@ public class PaymentOrderController {
 
     @PostMapping
     public ResponseEntity<PaymentOrderResponse> create(
-            @RequestBody PaymentOrderRequest request
+            @Valid @RequestBody PaymentOrderRequest request
     ) {
-        return ResponseEntity.ok(service.create(request));
+        PaymentOrderResponse response = service.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PaymentOrderResponse> update(
             @PathVariable Long id,
-            @RequestBody PaymentOrderRequest request
+            @Valid @RequestBody PaymentOrderRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

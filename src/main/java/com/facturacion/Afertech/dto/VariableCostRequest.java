@@ -1,62 +1,35 @@
 package com.facturacion.Afertech.dto;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class VariableCostRequest {
 
+    @NotNull
     private Long costTypeId;
-    private String description;
+
+    @NotNull
     private BigDecimal amount;
-    private LocalDate date;
+
+    // Mes contable (ej: 2025-01-01)
+    @NotNull
+    private LocalDate allocationMonth;
+
+    // Fecha real de pago
+    @NotNull
+    private LocalDate paymentDate;
+
+    @NotNull
     private String businessName;
-    private Long projectId;
 
-    public Long getCostTypeId() {
-        return costTypeId;
-    }
+    private String description;
 
-    public void setCostTypeId(Long costTypeId) {
-        this.costTypeId = costTypeId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public String getBusinessName() {
-        return businessName;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public void setBusinessName(String businessName) {
-        this.businessName = businessName;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
+    // Solo requerido para algunos tipos (regla futura)
+    private String projectNumber;
 }

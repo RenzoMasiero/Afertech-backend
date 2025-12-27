@@ -1,10 +1,15 @@
 package com.facturacion.Afertech.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "purchase_orders")
 public class PurchaseOrder {
@@ -13,57 +18,38 @@ public class PurchaseOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Empresa / proveedor
     @Column(nullable = false)
-    private String supplier;
+    private String company;
 
+    // Número de Orden de Compra
+    @Column(nullable = false)
+    private String purchaseOrderNumber;
+
+    // Fecha de emisión de la OC
+    @Column(nullable = false)
+    private LocalDate issueDate;
+
+    // Fecha de carga en el sistema
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Número de proyecto (referencia lógica a Project)
+    private String projectNumber;
+
+    // Importes
+    @Column(nullable = false)
+    private BigDecimal totalWithoutTax;
+
+    @Column(nullable = false)
+    private BigDecimal totalWithTax;
+
+    // Descripción
     @Column(length = 500)
     private String description;
 
-    @Column(nullable = false)
-    private BigDecimal amount;
-
-    @Column(nullable = false)
-    private LocalDate date;
-
-    // ===== getters & setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getSupplier() {
-        return supplier;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setSupplier(String supplier) {
-        this.supplier = supplier;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

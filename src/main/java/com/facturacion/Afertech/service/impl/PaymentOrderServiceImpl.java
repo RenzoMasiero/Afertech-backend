@@ -14,47 +14,60 @@ import java.util.List;
 public class PaymentOrderServiceImpl implements PaymentOrderService {
 
     private final PaymentOrderRepository repository;
+    private final PaymentOrderMapper mapper;
 
-    public PaymentOrderServiceImpl(PaymentOrderRepository repository) {
+    public PaymentOrderServiceImpl(
+            PaymentOrderRepository repository,
+            PaymentOrderMapper mapper
+    ) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<PaymentOrderResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(PaymentOrderMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public PaymentOrderResponse findById(Long id) {
-        PaymentOrder order = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("PaymentOrder not found"));
-        return PaymentOrderMapper.toResponse(order);
+        PaymentOrder paymentOrder = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment order not found"));
+        return mapper.toResponse(paymentOrder);
     }
 
     @Override
     public PaymentOrderResponse create(PaymentOrderRequest request) {
-        PaymentOrder order = PaymentOrderMapper.toEntity(request);
-        return PaymentOrderMapper.toResponse(repository.save(order));
+        PaymentOrder paymentOrder = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(paymentOrder));
     }
 
     @Override
     public PaymentOrderResponse update(Long id, PaymentOrderRequest request) {
-        PaymentOrder order = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("PaymentOrder not found"));
+        PaymentOrder paymentOrder = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment order not found"));
 
-        order.setSupplier(request.getSupplier());
-        order.setDescription(request.getDescription());
-        order.setAmount(request.getAmount());
-        order.setDate(request.getDate());
+        paymentOrder.setCompany(request.getCompany());
+        paymentOrder.setPaymentOrderNumber(request.getPaymentOrderNumber());
+        paymentOrder.setIssueDate(request.getIssueDate());
+        paymentOrder.setProjectNumber(request.getProjectNumber());
+        paymentOrder.setTotalWithoutTax(request.getTotalWithoutTax());
+        paymentOrder.setTotalWithTax(request.getTotalWithTax());
+        paymentOrder.setConcept(request.getConcept());
+        paymentOrder.setInvoiceNumber(request.getInvoiceNumber());
+        paymentOrder.setPurchaseOrderNumber(request.getPurchaseOrderNumber());
+        paymentOrder.setWithholdings(request.getWithholdings());
 
-        return PaymentOrderMapper.toResponse(repository.save(order));
+        return mapper.toResponse(repository.save(paymentOrder));
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        PaymentOrder paymentOrder = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment order not found"));
+        repository.delete(paymentOrder);
     }
 }

@@ -2,21 +2,13 @@ package com.facturacion.Afertech.mapper;
 
 import com.facturacion.Afertech.dto.FixedCostResponse;
 import com.facturacion.Afertech.model.FixedCost;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class FixedCostMapper {
+@Mapper(componentModel = "spring")
+public interface FixedCostMapper {
 
-    public static FixedCostResponse toResponse(FixedCost fixedCost) {
-        FixedCostResponse response = new FixedCostResponse();
-        response.setId(fixedCost.getId());
-        response.setAmount(fixedCost.getAmount());
-        response.setDate(fixedCost.getDate());
-        response.setDescription(fixedCost.getDescription());
-
-        if (fixedCost.getCostType() != null) {
-            response.setCostTypeId(fixedCost.getCostType().getId());
-            response.setCostTypeName(fixedCost.getCostType().getName());
-        }
-
-        return response;
-    }
+    @Mapping(source = "costType.id", target = "costTypeId")
+    @Mapping(source = "costType.name", target = "costTypeName")
+    FixedCostResponse toResponse(FixedCost fixedCost);
 }

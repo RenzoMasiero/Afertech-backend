@@ -3,21 +3,12 @@ package com.facturacion.Afertech.mapper;
 import com.facturacion.Afertech.dto.ProjectRequest;
 import com.facturacion.Afertech.dto.ProjectResponse;
 import com.facturacion.Afertech.model.Project;
+import org.mapstruct.Mapper;
 
-public class ProjectMapper {
+@Mapper(componentModel = "spring")
+public interface ProjectMapper {
 
-    public static Project toEntity(ProjectRequest request) {
-        Project project = new Project();
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        return project;
-    }
+    Project toEntity(ProjectRequest request);
 
-    public static ProjectResponse toResponse(Project project) {
-        ProjectResponse response = new ProjectResponse();
-        response.setId(project.getId());
-        response.setName(project.getName());
-        response.setDescription(project.getDescription());
-        return response;
-    }
+    ProjectResponse toResponse(Project project);
 }

@@ -17,62 +17,71 @@ public class FixedCostServiceImpl implements FixedCostService {
 
     private final FixedCostRepository repository;
     private final CostTypeRepository costTypeRepository;
+    private final FixedCostMapper mapper;
 
     public FixedCostServiceImpl(
             FixedCostRepository repository,
-            CostTypeRepository costTypeRepository
+            CostTypeRepository costTypeRepository,
+            FixedCostMapper mapper
     ) {
         this.repository = repository;
         this.costTypeRepository = costTypeRepository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<FixedCostResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(FixedCostMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public FixedCostResponse findById(Long id) {
         FixedCost fixedCost = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("FixedCost not found"));
-        return FixedCostMapper.toResponse(fixedCost);
+                .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
+        return mapper.toResponse(fixedCost);
     }
 
     @Override
     public FixedCostResponse create(FixedCostRequest request) {
+
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("CostType not found"));
+                .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
         FixedCost fixedCost = new FixedCost();
         fixedCost.setCostType(costType);
-        fixedCost.setDescription(request.getDescription());
         fixedCost.setAmount(request.getAmount());
-        fixedCost.setDate(request.getDate());
+        fixedCost.setAllocationMonth(request.getAllocationMonth());
+        fixedCost.setPaymentDate(request.getPaymentDate());
+        fixedCost.setDescription(request.getDescription());
 
-        return FixedCostMapper.toResponse(repository.save(fixedCost));
+        return mapper.toResponse(repository.save(fixedCost));
     }
 
     @Override
     public FixedCostResponse update(Long id, FixedCostRequest request) {
+
         FixedCost fixedCost = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("FixedCost not found"));
+                .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
 
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("CostType not found"));
+                .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
         fixedCost.setCostType(costType);
-        fixedCost.setDescription(request.getDescription());
         fixedCost.setAmount(request.getAmount());
-        fixedCost.setDate(request.getDate());
+        fixedCost.setAllocationMonth(request.getAllocationMonth());
+        fixedCost.setPaymentDate(request.getPaymentDate());
+        fixedCost.setDescription(request.getDescription());
 
-        return FixedCostMapper.toResponse(repository.save(fixedCost));
+        return mapper.toResponse(repository.save(fixedCost));
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        FixedCost fixedCost = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
+        repository.delete(fixedCost);
     }
 }

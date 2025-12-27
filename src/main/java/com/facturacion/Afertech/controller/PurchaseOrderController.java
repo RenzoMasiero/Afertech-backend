@@ -3,6 +3,8 @@ package com.facturacion.Afertech.controller;
 import com.facturacion.Afertech.dto.PurchaseOrderRequest;
 import com.facturacion.Afertech.dto.PurchaseOrderResponse;
 import com.facturacion.Afertech.service.PurchaseOrderService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,15 +32,16 @@ public class PurchaseOrderController {
 
     @PostMapping
     public ResponseEntity<PurchaseOrderResponse> create(
-            @RequestBody PurchaseOrderRequest request
+            @Valid @RequestBody PurchaseOrderRequest request
     ) {
-        return ResponseEntity.ok(service.create(request));
+        PurchaseOrderResponse response = service.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PurchaseOrderResponse> update(
             @PathVariable Long id,
-            @RequestBody PurchaseOrderRequest request
+            @Valid @RequestBody PurchaseOrderRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
     }

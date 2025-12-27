@@ -14,45 +14,49 @@ import java.util.List;
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository repository;
+    private final ProjectMapper mapper;
 
-    public ProjectServiceImpl(ProjectRepository repository) {
+    public ProjectServiceImpl(ProjectRepository repository, ProjectMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public List<ProjectResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(ProjectMapper::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
     public ProjectResponse findById(Long id) {
         Project project = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
-        return ProjectMapper.toResponse(project);
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        return mapper.toResponse(project);
     }
 
     @Override
     public ProjectResponse create(ProjectRequest request) {
-        Project project = ProjectMapper.toEntity(request);
-        return ProjectMapper.toResponse(repository.save(project));
+        Project project = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(project));
     }
 
     @Override
     public ProjectResponse update(Long id, ProjectRequest request) {
         Project project = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
 
-        return ProjectMapper.toResponse(repository.save(project));
+        return mapper.toResponse(repository.save(project));
     }
 
     @Override
     public void delete(Long id) {
-        repository.deleteById(id);
+        Project project = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        repository.delete(project);
     }
 }

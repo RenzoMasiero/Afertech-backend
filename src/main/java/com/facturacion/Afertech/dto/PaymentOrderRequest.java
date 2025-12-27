@@ -1,44 +1,37 @@
 package com.facturacion.Afertech.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class PaymentOrderRequest {
 
-    private String supplier;
-    private String description;
-    private BigDecimal amount;
-    private LocalDate date;
+    @NotBlank
+    private String company;
 
-    public String getSupplier() {
-        return supplier;
-    }
+    @NotBlank
+    private String paymentOrderNumber;
 
-    public String getDescription() {
-        return description;
-    }
+    @NotNull
+    private LocalDate issueDate;
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+    private String projectNumber;
 
-    public LocalDate getDate() {
-        return date;
-    }
+    @NotNull
+    private BigDecimal totalWithoutTax;
 
-    public void setSupplier(String supplier) {
-        this.supplier = supplier;
-    }
+    @NotNull
+    private BigDecimal totalWithTax;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    private String concept;
+    private String invoiceNumber;
+    private String purchaseOrderNumber;
+    private BigDecimal withholdings;
 }
+

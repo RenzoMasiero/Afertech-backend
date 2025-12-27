@@ -1,53 +1,23 @@
 package com.facturacion.Afertech.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Getter
+@Setter
 public class PurchaseOrderResponse {
 
     private Long id;
-    private String supplier;
+    private String company;
+    private String purchaseOrderNumber;
+    private LocalDate issueDate;
+    private LocalDateTime createdAt;
+    private String projectNumber;
+    private BigDecimal totalWithoutTax;
+    private BigDecimal totalWithTax;
     private String description;
-    private BigDecimal amount;
-    private LocalDate date;
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getSupplier() {
-        return supplier;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setSupplier(String supplier) {
-        this.supplier = supplier;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
 }

@@ -1,7 +1,11 @@
 package com.facturacion.Afertech.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "variable_cost_types")
 public class VariableCostType {
@@ -12,22 +16,4 @@ public class VariableCostType {
 
     @Column(nullable = false, unique = true)
     private String name;
-
-    // ===== getters & setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
