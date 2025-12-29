@@ -19,6 +19,19 @@ jwt:
 
 logging:
   level:
-    root: INFO
-    org.hibernate.SQL: WARN
+    root: ERROR
+
+    # Spring framework (silencia warnings informativos)
+    org.springframework: ERROR
+    org.springframework.web: ERROR
+    org.springframework.security: ERROR
+    org.springframework.security.config: ERROR
+
+    # Hibernate / JPA
+    org.hibernate: ERROR
+    org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+    # Tomcat
+    org.apache.catalina: ERROR
+    org.apache.tomcat: ERROR
