@@ -8,8 +8,11 @@ import com.facturacion.Afertech.model.FixedCost;
 import com.facturacion.Afertech.repository.CostTypeRepository;
 import com.facturacion.Afertech.repository.FixedCostRepository;
 import com.facturacion.Afertech.service.FixedCostService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -80,8 +83,17 @@ public class FixedCostServiceImpl implements FixedCostService {
 
     @Override
     public void delete(Long id) {
+
         FixedCost fixedCost = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
-        repository.delete(fixedCost);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        fixedCost.setDeletedAt(LocalDateTime.now());
+        fixedCost.setDeletedBy(auth.getName());
+
+        repository.save(fixedCost);
     }
 }

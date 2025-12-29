@@ -6,8 +6,11 @@ import com.facturacion.Afertech.mapper.ProjectMapper;
 import com.facturacion.Afertech.model.Project;
 import com.facturacion.Afertech.repository.ProjectRepository;
 import com.facturacion.Afertech.service.ProjectService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -55,8 +58,17 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void delete(Long id) {
+
         Project project = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
-        repository.delete(project);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        project.setDeletedAt(LocalDateTime.now());
+        project.setDeletedBy(auth.getName());
+
+        repository.save(project);
     }
 }

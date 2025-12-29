@@ -6,8 +6,11 @@ import com.facturacion.Afertech.mapper.CostTypeMapper;
 import com.facturacion.Afertech.model.CostType;
 import com.facturacion.Afertech.repository.CostTypeRepository;
 import com.facturacion.Afertech.service.CostTypeService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -53,9 +56,17 @@ public class CostTypeServiceImpl implements CostTypeService {
 
     @Override
     public void delete(Long id) {
+
         CostType costType = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
-        repository.delete(costType);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        costType.setDeletedAt(LocalDateTime.now());
+        costType.setDeletedBy(auth.getName());
+
+        repository.save(costType);
     }
 }
-

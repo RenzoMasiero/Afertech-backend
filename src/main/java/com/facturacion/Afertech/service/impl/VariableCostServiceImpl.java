@@ -8,8 +8,11 @@ import com.facturacion.Afertech.model.VariableCostType;
 import com.facturacion.Afertech.repository.VariableCostRepository;
 import com.facturacion.Afertech.repository.VariableCostTypeRepository;
 import com.facturacion.Afertech.service.VariableCostService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -84,8 +87,17 @@ public class VariableCostServiceImpl implements VariableCostService {
 
     @Override
     public void delete(Long id) {
+
         VariableCost cost = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Variable cost not found"));
-        repository.delete(cost);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        cost.setDeletedAt(LocalDateTime.now());
+        cost.setDeletedBy(auth.getName());
+
+        repository.save(cost);
     }
 }

@@ -6,8 +6,11 @@ import com.facturacion.Afertech.mapper.VariableCostTypeMapper;
 import com.facturacion.Afertech.model.VariableCostType;
 import com.facturacion.Afertech.repository.VariableCostTypeRepository;
 import com.facturacion.Afertech.service.VariableCostTypeService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -56,8 +59,17 @@ public class VariableCostTypeServiceImpl implements VariableCostTypeService {
 
     @Override
     public void delete(Long id) {
+
         VariableCostType type = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Variable cost type not found"));
-        repository.delete(type);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        type.setDeletedAt(LocalDateTime.now());
+        type.setDeletedBy(auth.getName());
+
+        repository.save(type);
     }
 }
