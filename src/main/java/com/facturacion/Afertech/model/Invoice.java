@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "invoices")
-public class Invoice {
+public class Invoice extends BaseAuditableEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

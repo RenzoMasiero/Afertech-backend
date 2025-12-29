@@ -15,7 +15,7 @@ import java.time.LocalDate;
                 @UniqueConstraint(columnNames = "document_number")
         }
 )
-public class Employee {
+public class Employee extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

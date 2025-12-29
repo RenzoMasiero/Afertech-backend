@@ -12,40 +12,27 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Maneja errores de validación (@Valid)
-     * Devuelve 400 con detalle campo -> mensaje
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(
             MethodArgumentNotValidException ex
     ) {
         Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult()
-                .getFieldErrors()
+        ex.getBindingResult().getFieldErrors()
                 .forEach(error ->
                         errors.put(error.getField(), error.getDefaultMessage())
                 );
 
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(
+            IllegalArgumentException ex
+    ) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(errors);
+                .body(ex.getMessage());
     }
 
-    /**
-     * Maneja RuntimeException genéricas (por ahora)
-     * Ej: "Invoice not found"
-     */
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(
-            RuntimeException ex
-    ) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(error);
-    }
+    // ❗ NO capturar RuntimeException genérica
 }

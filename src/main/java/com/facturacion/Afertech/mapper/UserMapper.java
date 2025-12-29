@@ -20,7 +20,10 @@ public interface UserMapper {
 
     @Named("stringToRole")
     default Role stringToRole(String role) {
-        return Role.valueOf(role);
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        return Role.valueOf(role.trim().toUpperCase());
     }
 
     @Named("roleToString")

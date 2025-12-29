@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "cost_types")
-public class CostType {
+public class CostType extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,4 +17,3 @@ public class CostType {
     @Column(nullable = false, unique = true)
     private String name;
 }
-

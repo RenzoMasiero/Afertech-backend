@@ -13,3 +13,4 @@ server:
 
 jwt:
   expiration: 3600000 # 1 hora
+

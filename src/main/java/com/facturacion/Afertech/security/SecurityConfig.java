@@ -37,13 +37,25 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // auth
+
+                        // Públicos
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
 
-                        // OPCIÓN B → permitir crear usuario SOLO por POST
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        // USERS → SOLO ADMIN (todos los métodos)
+                        .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // todo lo demás protegido
+                        // DELETE → solo ADMIN
+                        .requestMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
+
+                        // GET → ADMIN o USER
+                        .requestMatchers(HttpMethod.GET, "/**")
+                        .hasAnyRole("ADMIN", "USER")
+
+                        // POST → ADMIN o USER (EXCLUYENDO /users)
+                        .requestMatchers(HttpMethod.POST, "/invoices/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/projects/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

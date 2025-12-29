@@ -2,7 +2,6 @@ package com.facturacion.Afertech.controller;
 
 import com.facturacion.Afertech.dto.UserRequest;
 import com.facturacion.Afertech.dto.UserResponse;
-import com.facturacion.Afertech.repository.UserRepository;
 import com.facturacion.Afertech.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,11 +15,9 @@ import java.util.List;
 public class UserController {
 
     private final UserService service;
-    private final UserRepository repository;
 
-    public UserController(UserService service, UserRepository repository) {
+    public UserController(UserService service) {
         this.service = service;
-        this.repository = repository;
     }
 
     @GetMapping
@@ -34,14 +31,9 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest request) {
-
-        // OPCIÓN B:
-        // solo permitir crear si NO existe ningún usuario
-        if (repository.count() > 0) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    public ResponseEntity<UserResponse> create(
+            @Valid @RequestBody UserRequest request
+    ) {
         UserResponse response = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

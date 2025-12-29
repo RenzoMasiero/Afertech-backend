@@ -6,13 +6,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "purchase_orders")
-public class PurchaseOrder {
+public class PurchaseOrder extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +29,6 @@ public class PurchaseOrder {
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Fecha de carga en el sistema
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     // Número de proyecto (referencia lógica a Project)
     private String projectNumber;
 
@@ -47,9 +42,4 @@ public class PurchaseOrder {
     // Descripción
     @Column(length = 500)
     private String description;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
                 @UniqueConstraint(columnNames = "tax_id")
         }
 )
-public class Client {
+public class Client extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
