@@ -3,6 +3,7 @@ package com.facturacion.Afertech.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 
@@ -15,6 +16,7 @@ import java.time.LocalDate;
                 @UniqueConstraint(columnNames = "document_number")
         }
 )
+@Where(clause = "deleted_at IS NULL")
 public class Employee extends BaseAuditableEntity {
 
     @Id

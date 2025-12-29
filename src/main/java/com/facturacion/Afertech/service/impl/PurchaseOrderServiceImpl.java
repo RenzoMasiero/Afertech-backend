@@ -6,8 +6,11 @@ import com.facturacion.Afertech.mapper.PurchaseOrderMapper;
 import com.facturacion.Afertech.model.PurchaseOrder;
 import com.facturacion.Afertech.repository.PurchaseOrderRepository;
 import com.facturacion.Afertech.service.PurchaseOrderService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -63,8 +66,17 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public void delete(Long id) {
+
         PurchaseOrder purchaseOrder = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
-        repository.delete(purchaseOrder);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        purchaseOrder.setDeletedAt(LocalDateTime.now());
+        purchaseOrder.setDeletedBy(auth.getName());
+
+        repository.save(purchaseOrder);
     }
 }

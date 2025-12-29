@@ -15,7 +15,13 @@ public class PaymentOrderResponse {
     private String company;
     private String paymentOrderNumber;
     private LocalDate issueDate;
+
+    // Auditoría (ya estaba)
     private LocalDateTime createdAt;
+
+    // Fecha de carga funcional
+    private LocalDateTime loadedAt;
+
     private String projectNumber;
     private BigDecimal totalWithoutTax;
     private BigDecimal totalWithTax;

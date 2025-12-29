@@ -6,8 +6,11 @@ import com.facturacion.Afertech.mapper.PaymentOrderMapper;
 import com.facturacion.Afertech.model.PaymentOrder;
 import com.facturacion.Afertech.repository.PaymentOrderRepository;
 import com.facturacion.Afertech.service.PaymentOrderService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -66,8 +69,17 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
 
     @Override
     public void delete(Long id) {
+
         PaymentOrder paymentOrder = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment order not found"));
-        repository.delete(paymentOrder);
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        paymentOrder.setDeletedAt(LocalDateTime.now());
+        paymentOrder.setDeletedBy(auth.getName());
+
+        repository.save(paymentOrder);
     }
 }

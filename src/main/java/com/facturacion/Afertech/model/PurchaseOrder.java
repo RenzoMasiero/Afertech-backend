@@ -1,8 +1,10 @@
+
 package com.facturacion.Afertech.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "purchase_orders")
+@Where(clause = "deleted_at IS NULL")
 public class PurchaseOrder extends BaseAuditableEntity {
 
     @Id

@@ -15,7 +15,13 @@ public class InvoiceResponse {
     private String company;
     private String invoiceNumber;
     private LocalDate issueDate;
+
+    // Auditoría (ya estaba, no se toca)
     private LocalDateTime createdAt;
+
+    // Fecha de carga funcional (NUEVO)
+    private LocalDateTime loadedAt;
+
     private String description;
     private BigDecimal totalWithoutTax;
     private BigDecimal totalWithTax;

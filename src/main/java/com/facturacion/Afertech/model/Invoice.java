@@ -3,6 +3,7 @@ package com.facturacion.Afertech.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "invoices")
-public class Invoice extends BaseAuditableEntity  {
+@Where(clause = "deleted_at IS NULL")
+public class Invoice extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +32,9 @@ public class Invoice extends BaseAuditableEntity  {
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Fecha de carga en el sistema (automática)
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    // Fecha de carga funcional (visible para el usuario)
+    @Column(name = "loaded_at", nullable = false, updatable = false)
+    private LocalDateTime loadedAt;
 
     private String description;
 
@@ -53,7 +55,7 @@ public class Invoice extends BaseAuditableEntity  {
     private String paymentOrder;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+    protected void onLoad() {
+        this.loadedAt = LocalDateTime.now();
     }
 }
