@@ -6,9 +6,11 @@ import com.facturacion.Afertech.mapper.EmployeeMapper;
 import com.facturacion.Afertech.model.Employee;
 import com.facturacion.Afertech.repository.EmployeeRepository;
 import com.facturacion.Afertech.service.EmployeeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -22,11 +24,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<EmployeeResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -43,7 +43,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new RuntimeException("Employee with this document already exists");
         }
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         Employee employee = mapper.toEntity(request);
+        employee.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(employee));
     }
 

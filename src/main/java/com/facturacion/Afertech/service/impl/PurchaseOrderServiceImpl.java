@@ -6,12 +6,13 @@ import com.facturacion.Afertech.mapper.PurchaseOrderMapper;
 import com.facturacion.Afertech.model.PurchaseOrder;
 import com.facturacion.Afertech.repository.PurchaseOrderRepository;
 import com.facturacion.Afertech.service.PurchaseOrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
@@ -28,11 +29,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
-    public List<PurchaseOrderResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PurchaseOrderResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -44,7 +43,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public PurchaseOrderResponse create(PurchaseOrderRequest request) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         PurchaseOrder purchaseOrder = mapper.toEntity(request);
+
+        // dato funcional: quién cargó la orden de compra
+        purchaseOrder.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(purchaseOrder));
     }
 

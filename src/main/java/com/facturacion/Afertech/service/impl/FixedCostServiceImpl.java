@@ -8,12 +8,13 @@ import com.facturacion.Afertech.model.FixedCost;
 import com.facturacion.Afertech.repository.CostTypeRepository;
 import com.facturacion.Afertech.repository.FixedCostRepository;
 import com.facturacion.Afertech.service.FixedCostService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class FixedCostServiceImpl implements FixedCostService {
@@ -33,11 +34,9 @@ public class FixedCostServiceImpl implements FixedCostService {
     }
 
     @Override
-    public List<FixedCostResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<FixedCostResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -50,6 +49,10 @@ public class FixedCostServiceImpl implements FixedCostService {
     @Override
     public FixedCostResponse create(FixedCostRequest request) {
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
@@ -59,6 +62,7 @@ public class FixedCostServiceImpl implements FixedCostService {
         fixedCost.setAllocationMonth(request.getAllocationMonth());
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
+        fixedCost.setLoadedBy(auth.getName());
 
         return mapper.toResponse(repository.save(fixedCost));
     }

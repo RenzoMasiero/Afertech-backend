@@ -32,9 +32,13 @@ public class Invoice extends BaseAuditableEntity {
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Fecha de carga funcional (visible para el usuario)
-    @Column(name = "loaded_at", nullable = false, updatable = false)
+    // Fecha de carga funcional
+    @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
+
+    // Usuario que cargó (dato funcional)
+    @Column(nullable = false, updatable = false)
+    private String loadedBy;
 
     private String description;
 
@@ -45,17 +49,14 @@ public class Invoice extends BaseAuditableEntity {
     private BigDecimal totalWithTax;
 
     private Integer deferredPaymentDays;
-
     private String projectNumber;
-
     private String purchaseOrder;
-
     private Integer purchaseOrderPercentage;
-
     private String paymentOrder;
 
     @PrePersist
-    protected void onLoad() {
+    protected void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
+        // loadedBy se setea desde el service
     }
 }

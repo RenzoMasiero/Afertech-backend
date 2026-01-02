@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.CostTypeRequest;
 import com.facturacion.Afertech.dto.CostTypeResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CostTypeService {
 
-    List<CostTypeResponse> findAll();
+    Page<CostTypeResponse> findAll(Pageable pageable);
 
     CostTypeResponse findById(Long id);
 
@@ -17,3 +17,4 @@ public interface CostTypeService {
 
     void delete(Long id);
 }
+

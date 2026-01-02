@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,4 +17,10 @@ public class EmployeeResponse {
     private boolean active;
     private LocalDate hireDate;
     private LocalDate terminationDate;
+
+    // Fecha de carga funcional
+    private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    private String loadedBy;
 }

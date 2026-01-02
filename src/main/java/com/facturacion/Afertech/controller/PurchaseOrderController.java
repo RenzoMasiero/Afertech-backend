@@ -1,14 +1,15 @@
 package com.facturacion.Afertech.controller;
 
+import com.facturacion.Afertech.dto.PageResponse;
 import com.facturacion.Afertech.dto.PurchaseOrderRequest;
 import com.facturacion.Afertech.dto.PurchaseOrderResponse;
 import com.facturacion.Afertech.service.PurchaseOrderService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/purchase-orders")
@@ -21,8 +22,19 @@ public class PurchaseOrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PurchaseOrderResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<PageResponse<PurchaseOrderResponse>> findAll(Pageable pageable) {
+
+        Page<PurchaseOrderResponse> page = service.findAll(pageable);
+
+        PageResponse<PurchaseOrderResponse> response = new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -34,8 +46,9 @@ public class PurchaseOrderController {
     public ResponseEntity<PurchaseOrderResponse> create(
             @Valid @RequestBody PurchaseOrderRequest request
     ) {
-        PurchaseOrderResponse response = service.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.create(request));
     }
 
     @PutMapping("/{id}")

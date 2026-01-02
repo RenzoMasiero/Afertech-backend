@@ -2,7 +2,9 @@ package com.facturacion.Afertech.controller;
 
 import com.facturacion.Afertech.dto.AuthRequest;
 import com.facturacion.Afertech.dto.AuthResponse;
+import com.facturacion.Afertech.model.User;
 import com.facturacion.Afertech.security.JwtService;
+import com.facturacion.Afertech.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,13 +39,22 @@ public class AuthController {
                 )
         );
 
-        String token = jwtService.generateToken(
-                (org.springframework.security.core.userdetails.UserDetails)
-                        authentication.getPrincipal()
-        );
+        UserDetailsImpl principal =
+                (UserDetailsImpl) authentication.getPrincipal();
+
+        User user = principal.getUser();
+
+        String token = jwtService.generateToken(principal);
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
+
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo();
+        userInfo.setId(user.getId());
+        userInfo.setEmail(user.getEmail());
+        userInfo.setRole(user.getRole().name());
+
+        response.setUser(userInfo);
 
         return ResponseEntity.ok(response);
     }

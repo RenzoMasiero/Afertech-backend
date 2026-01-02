@@ -2,13 +2,14 @@ package com.facturacion.Afertech.controller;
 
 import com.facturacion.Afertech.dto.FixedCostRequest;
 import com.facturacion.Afertech.dto.FixedCostResponse;
+import com.facturacion.Afertech.dto.PageResponse;
 import com.facturacion.Afertech.service.FixedCostService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/fixed-costs")
@@ -21,8 +22,19 @@ public class FixedCostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FixedCostResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<PageResponse<FixedCostResponse>> findAll(Pageable pageable) {
+
+        Page<FixedCostResponse> page = service.findAll(pageable);
+
+        PageResponse<FixedCostResponse> response = new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

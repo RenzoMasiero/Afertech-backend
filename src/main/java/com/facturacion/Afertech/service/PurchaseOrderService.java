@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.PurchaseOrderRequest;
 import com.facturacion.Afertech.dto.PurchaseOrderResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PurchaseOrderService {
 
-    List<PurchaseOrderResponse> findAll();
+    Page<PurchaseOrderResponse> findAll(Pageable pageable);
 
     PurchaseOrderResponse findById(Long id);
 

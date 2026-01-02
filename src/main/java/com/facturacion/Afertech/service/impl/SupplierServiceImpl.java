@@ -6,9 +6,11 @@ import com.facturacion.Afertech.mapper.SupplierMapper;
 import com.facturacion.Afertech.model.Supplier;
 import com.facturacion.Afertech.repository.SupplierRepository;
 import com.facturacion.Afertech.service.SupplierService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class SupplierServiceImpl implements SupplierService {
@@ -22,11 +24,9 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public List<SupplierResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<SupplierResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -43,7 +43,13 @@ public class SupplierServiceImpl implements SupplierService {
             throw new RuntimeException("Supplier with this taxId already exists");
         }
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         Supplier supplier = mapper.toEntity(request);
+        supplier.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(supplier));
     }
 

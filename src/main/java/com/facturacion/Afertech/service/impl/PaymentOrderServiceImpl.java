@@ -6,12 +6,13 @@ import com.facturacion.Afertech.mapper.PaymentOrderMapper;
 import com.facturacion.Afertech.model.PaymentOrder;
 import com.facturacion.Afertech.repository.PaymentOrderRepository;
 import com.facturacion.Afertech.service.PaymentOrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class PaymentOrderServiceImpl implements PaymentOrderService {
@@ -28,11 +29,9 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
     }
 
     @Override
-    public List<PaymentOrderResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PaymentOrderResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -44,7 +43,16 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
 
     @Override
     public PaymentOrderResponse create(PaymentOrderRequest request) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         PaymentOrder paymentOrder = mapper.toEntity(request);
+
+        // dato funcional: quién cargó la orden de pago
+        paymentOrder.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(paymentOrder));
     }
 

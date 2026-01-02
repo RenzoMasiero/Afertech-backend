@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,4 +23,10 @@ public class VariableCostResponse {
     private String businessName;
     private String description;
     private String projectNumber;
+
+    // Fecha de carga funcional
+    private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    private String loadedBy;
 }

@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.VariableCostTypeRequest;
 import com.facturacion.Afertech.dto.VariableCostTypeResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface VariableCostTypeService {
 
-    List<VariableCostTypeResponse> findAll();
+    Page<VariableCostTypeResponse> findAll(Pageable pageable);
 
     VariableCostTypeResponse findById(Long id);
 

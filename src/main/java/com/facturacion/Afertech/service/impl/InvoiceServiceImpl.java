@@ -49,14 +49,11 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .getContext()
                 .getAuthentication();
 
-        log.info(
-                "AUDIT-TEST | name={} | principal={} | authorities={}",
-                auth.getName(),
-                auth.getPrincipal().getClass().getSimpleName(),
-                auth.getAuthorities()
-        );
-
         Invoice invoice = mapper.toEntity(request);
+
+        // dato funcional: quién cargó la factura
+        invoice.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(invoice));
     }
 

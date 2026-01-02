@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.ProjectRequest;
 import com.facturacion.Afertech.dto.ProjectResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProjectService {
 
-    List<ProjectResponse> findAll();
+    Page<ProjectResponse> findAll(Pageable pageable);
 
     ProjectResponse findById(Long id);
 

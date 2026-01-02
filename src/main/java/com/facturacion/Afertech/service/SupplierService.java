@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.SupplierRequest;
 import com.facturacion.Afertech.dto.SupplierResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface SupplierService {
 
-    List<SupplierResponse> findAll();
+    Page<SupplierResponse> findAll(Pageable pageable);
 
     SupplierResponse findById(Long id);
 

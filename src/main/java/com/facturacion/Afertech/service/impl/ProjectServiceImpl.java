@@ -6,12 +6,13 @@ import com.facturacion.Afertech.mapper.ProjectMapper;
 import com.facturacion.Afertech.model.Project;
 import com.facturacion.Afertech.repository.ProjectRepository;
 import com.facturacion.Afertech.service.ProjectService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -25,11 +26,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<ProjectResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -41,7 +40,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse create(ProjectRequest request) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         Project project = mapper.toEntity(request);
+        project.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(project));
     }
 

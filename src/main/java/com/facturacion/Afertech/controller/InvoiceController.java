@@ -2,6 +2,7 @@ package com.facturacion.Afertech.controller;
 
 import com.facturacion.Afertech.dto.InvoiceRequest;
 import com.facturacion.Afertech.dto.InvoiceResponse;
+import com.facturacion.Afertech.dto.PageResponse;
 import com.facturacion.Afertech.service.InvoiceService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -20,8 +21,19 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<InvoiceResponse>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(service.findAll(pageable));
+    public ResponseEntity<PageResponse<InvoiceResponse>> findAll(Pageable pageable) {
+
+        Page<InvoiceResponse> page = service.findAll(pageable);
+
+        PageResponse<InvoiceResponse> response = new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

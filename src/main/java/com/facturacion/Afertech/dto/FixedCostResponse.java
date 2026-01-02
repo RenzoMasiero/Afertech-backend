@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,4 +18,10 @@ public class FixedCostResponse {
     private LocalDate allocationMonth;
     private LocalDate paymentDate;
     private String description;
+
+    // Fecha de carga funcional
+    private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    private String loadedBy;
 }

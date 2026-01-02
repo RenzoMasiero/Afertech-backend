@@ -16,11 +16,11 @@ public class InvoiceResponse {
     private String invoiceNumber;
     private LocalDate issueDate;
 
-    // Auditoría (ya estaba, no se toca)
-    private LocalDateTime createdAt;
-
-    // Fecha de carga funcional (NUEVO)
+    // Fecha de carga funcional
     private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    private String loadedBy;
 
     private String description;
     private BigDecimal totalWithoutTax;

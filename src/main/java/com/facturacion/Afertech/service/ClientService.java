@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.ClientRequest;
 import com.facturacion.Afertech.dto.ClientResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ClientService {
 
-    List<ClientResponse> findAll();
+    Page<ClientResponse> findAll(Pageable pageable);
 
     ClientResponse findById(Long id);
 

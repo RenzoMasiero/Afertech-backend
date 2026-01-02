@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -41,4 +42,18 @@ public class Employee extends BaseAuditableEntity {
 
     // Fecha de baja (si corresponde)
     private LocalDate terminationDate;
+
+    // Fecha de carga funcional
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    @Column(nullable = false, updatable = false)
+    private String loadedBy;
+
+    @PrePersist
+    private void onPrePersist() {
+        this.loadedAt = LocalDateTime.now();
+        // loadedBy se setea desde el service
+    }
 }

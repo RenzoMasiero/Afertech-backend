@@ -1,14 +1,15 @@
 package com.facturacion.Afertech.controller;
 
+import com.facturacion.Afertech.dto.PageResponse;
 import com.facturacion.Afertech.dto.VariableCostRequest;
 import com.facturacion.Afertech.dto.VariableCostResponse;
 import com.facturacion.Afertech.service.VariableCostService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/variable-costs")
@@ -21,8 +22,19 @@ public class VariableCostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VariableCostResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<PageResponse<VariableCostResponse>> findAll(Pageable pageable) {
+
+        Page<VariableCostResponse> page = service.findAll(pageable);
+
+        PageResponse<VariableCostResponse> response = new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

@@ -22,21 +22,11 @@ public interface InvoiceMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     @Mapping(target = "loadedAt", ignore = true)
+    @Mapping(target = "loadedBy", ignore = true)
     Invoice toEntity(InvoiceRequest request);
 
     // Entity → Response
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "company", source = "company")
-    @Mapping(target = "invoiceNumber", source = "invoiceNumber")
-    @Mapping(target = "issueDate", source = "issueDate")
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "totalWithoutTax", source = "totalWithoutTax")
-    @Mapping(target = "totalWithTax", source = "totalWithTax")
-    @Mapping(target = "deferredPaymentDays", source = "deferredPaymentDays")
-    @Mapping(target = "projectNumber", source = "projectNumber")
-    @Mapping(target = "purchaseOrder", source = "purchaseOrder")
-    @Mapping(target = "purchaseOrderPercentage", source = "purchaseOrderPercentage")
-    @Mapping(target = "paymentOrder", source = "paymentOrder")
+    @Mapping(target = "loadedAt", source = "loadedAt")
+    @Mapping(target = "loadedBy", source = "loadedBy")
     InvoiceResponse toResponse(Invoice invoice);
 }

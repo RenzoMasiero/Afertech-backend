@@ -32,9 +32,13 @@ public class PaymentOrder extends BaseAuditableEntity {
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Fecha de carga funcional (visible para el usuario)
-    @Column(name = "loaded_at", nullable = false, updatable = false)
+    // Fecha de carga funcional
+    @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    @Column(nullable = false, updatable = false)
+    private String loadedBy;
 
     // Número de proyecto (referencia lógica)
     private String projectNumber;
@@ -58,7 +62,8 @@ public class PaymentOrder extends BaseAuditableEntity {
     private BigDecimal withholdings;
 
     @PrePersist
-    protected void onLoad() {
+    protected void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
+        // loadedBy se setea desde el service
     }
 }

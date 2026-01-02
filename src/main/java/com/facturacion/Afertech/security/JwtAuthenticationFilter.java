@@ -1,5 +1,9 @@
 package com.facturacion.Afertech.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +39,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String username;
 
         // Si no hay header o no empieza con Bearer, seguimos sin autenticar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -44,13 +46,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
+        final String jwt = authHeader.substring(7);
+        final String username;
 
-        // Si todavía no hay autenticación en el contexto
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (ExpiredJwtException
+                 | MalformedJwtException
+                 | SignatureException
+                 | UnsupportedJwtException
+                 | IllegalArgumentException ex) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // JWT inválido o vencido → 401
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                  "error": "invalid_or_expired_token"
+                }
+                """);
+            return; // ⛔ cortamos la filter chain
+        }
+
+        if (username != null
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
 
@@ -62,10 +84,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
 
                 authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authToken);
             }
         }
 

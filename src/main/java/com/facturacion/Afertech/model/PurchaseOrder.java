@@ -1,4 +1,3 @@
-
 package com.facturacion.Afertech.model;
 
 import jakarta.persistence.*;
@@ -8,6 +7,7 @@ import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -45,4 +45,18 @@ public class PurchaseOrder extends BaseAuditableEntity {
     // Descripción
     @Column(length = 500)
     private String description;
+
+    // Fecha de carga funcional
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime loadedAt;
+
+    // Usuario que cargó
+    @Column(nullable = false, updatable = false)
+    private String loadedBy;
+
+    @PrePersist
+    private void onPrePersist() {
+        this.loadedAt = LocalDateTime.now();
+        // loadedBy se setea desde el service
+    }
 }

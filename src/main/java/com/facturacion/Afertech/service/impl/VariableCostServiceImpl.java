@@ -8,12 +8,13 @@ import com.facturacion.Afertech.model.VariableCostType;
 import com.facturacion.Afertech.repository.VariableCostRepository;
 import com.facturacion.Afertech.repository.VariableCostTypeRepository;
 import com.facturacion.Afertech.service.VariableCostService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class VariableCostServiceImpl implements VariableCostService {
@@ -33,11 +34,9 @@ public class VariableCostServiceImpl implements VariableCostService {
     }
 
     @Override
-    public List<VariableCostResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<VariableCostResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -53,6 +52,10 @@ public class VariableCostServiceImpl implements VariableCostService {
         VariableCostType type = typeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Variable cost type not found"));
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         VariableCost cost = new VariableCost();
         cost.setCostType(type);
         cost.setAmount(request.getAmount());
@@ -61,6 +64,7 @@ public class VariableCostServiceImpl implements VariableCostService {
         cost.setBusinessName(request.getBusinessName());
         cost.setDescription(request.getDescription());
         cost.setProjectNumber(request.getProjectNumber());
+        cost.setLoadedBy(auth.getName());
 
         return mapper.toResponse(repository.save(cost));
     }

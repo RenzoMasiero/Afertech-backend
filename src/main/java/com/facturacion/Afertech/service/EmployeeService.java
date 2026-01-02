@@ -2,12 +2,12 @@ package com.facturacion.Afertech.service;
 
 import com.facturacion.Afertech.dto.EmployeeRequest;
 import com.facturacion.Afertech.dto.EmployeeResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface EmployeeService {
 
-    List<EmployeeResponse> findAll();
+    Page<EmployeeResponse> findAll(Pageable pageable);
 
     EmployeeResponse findById(Long id);
 

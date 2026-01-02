@@ -6,12 +6,13 @@ import com.facturacion.Afertech.mapper.CostTypeMapper;
 import com.facturacion.Afertech.model.CostType;
 import com.facturacion.Afertech.repository.CostTypeRepository;
 import com.facturacion.Afertech.service.CostTypeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class CostTypeServiceImpl implements CostTypeService {
@@ -25,11 +26,9 @@ public class CostTypeServiceImpl implements CostTypeService {
     }
 
     @Override
-    public List<CostTypeResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<CostTypeResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -41,7 +40,14 @@ public class CostTypeServiceImpl implements CostTypeService {
 
     @Override
     public CostTypeResponse create(CostTypeRequest request) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         CostType costType = mapper.toEntity(request);
+        costType.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(costType));
     }
 
