@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @Setter
 public class InvoiceRequest {
 
-    @NotBlank
-    private String company;
+    @NotNull
+    private Long clientId;
 
     @NotBlank
     private String invoiceNumber;
@@ -35,17 +35,17 @@ public class InvoiceRequest {
     @Min(0)
     private Integer deferredPaymentDays;
 
-    @NotBlank
-    private String projectNumber;
+    @NotNull
+    private Long projectId;
 
-    @NotBlank
-    private String purchaseOrder;
+    @NotNull
+    private Long purchaseOrderId;
 
     @NotNull
     @Min(0)
     @Max(100)
     private Integer purchaseOrderPercentage;
 
-    @NotBlank
-    private String paymentOrder;
+    // opcional
+    private Long paymentOrderId;
 }

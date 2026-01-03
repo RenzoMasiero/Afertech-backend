@@ -13,8 +13,11 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface InvoiceMapper {
 
-    // Request → Entity
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "client", ignore = true)
+    @Mapping(target = "project", ignore = true)
+    @Mapping(target = "purchaseOrder", ignore = true)
+    @Mapping(target = "paymentOrder", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -25,8 +28,11 @@ public interface InvoiceMapper {
     @Mapping(target = "loadedBy", ignore = true)
     Invoice toEntity(InvoiceRequest request);
 
-    // Entity → Response
-    @Mapping(target = "loadedAt", source = "loadedAt")
-    @Mapping(target = "loadedBy", source = "loadedBy")
+    @Mapping(target = "clientId", source = "client.id")
+    @Mapping(target = "clientName", source = "client.name")
+    @Mapping(target = "projectId", source = "project.id")
+    @Mapping(target = "projectName", source = "project.name")
+    @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
+    @Mapping(target = "paymentOrderId", source = "paymentOrder.id")
     InvoiceResponse toResponse(Invoice invoice);
 }

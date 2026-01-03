@@ -20,43 +20,39 @@ public class PurchaseOrder extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Empresa / proveedor
-    @Column(nullable = false)
-    private String company;
+    // 🔗 Client
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
 
-    // Número de Orden de Compra
     @Column(nullable = false)
     private String purchaseOrderNumber;
 
-    // Fecha de emisión de la OC
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Número de proyecto (referencia lógica a Project)
-    private String projectNumber;
+    // 🔗 Project
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
-    // Importes
     @Column(nullable = false)
     private BigDecimal totalWithoutTax;
 
     @Column(nullable = false)
     private BigDecimal totalWithTax;
 
-    // Descripción
     @Column(length = 500)
     private String description;
 
-    // Fecha de carga funcional
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
 
-    // Usuario que cargó
     @Column(nullable = false, updatable = false)
     private String loadedBy;
 
     @PrePersist
     private void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
-        // loadedBy se setea desde el service
     }
 }

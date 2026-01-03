@@ -20,13 +20,14 @@ public class VariableCostResponse {
     private LocalDate allocationMonth;
     private LocalDate paymentDate;
 
-    private String businessName;
+    private Long supplierId;
+    private String supplierName;
+
+    private Long projectId;
+    private String projectName;
+
     private String description;
-    private String projectNumber;
 
-    // Fecha de carga funcional
     private LocalDateTime loadedAt;
-
-    // Usuario que cargó
     private String loadedBy;
 }

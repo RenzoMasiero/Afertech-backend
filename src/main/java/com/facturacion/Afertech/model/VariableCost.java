@@ -20,45 +20,41 @@ public class VariableCost extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Tipo de costo variable (Combustible, Materiales, EPP, etc.)
+    // Tipo de costo variable
     @ManyToOne(optional = false)
-    @JoinColumn(name = "variable_cost_type_id")
+    @JoinColumn(name = "variable_cost_type_id", nullable = false)
     private VariableCostType costType;
 
-    // Aclaración / detalle
     @Column(length = 500)
     private String description;
 
-    // Monto del costo
     @Column(nullable = false)
     private BigDecimal amount;
 
-    // Mes al que se imputa el costo (ej: 2025-01-01)
     @Column(nullable = false)
     private LocalDate allocationMonth;
 
-    // Fecha real de pago
     @Column(nullable = false)
     private LocalDate paymentDate;
 
-    // Razón social / proveedor
-    @Column(nullable = false)
-    private String businessName;
+    // 🔗 Supplier
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "supplier_id", nullable = false)
+    private Supplier supplier;
 
-    // Proyecto asociado (referencia lógica)
-    private String projectNumber;
+    // 🔗 Project
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    // Fecha de carga funcional
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
 
-    // Usuario que cargó
     @Column(nullable = false, updatable = false)
     private String loadedBy;
 
     @PrePersist
     private void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
-        // loadedBy se setea desde el service
     }
 }

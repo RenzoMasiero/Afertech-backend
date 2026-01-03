@@ -1,6 +1,5 @@
 package com.facturacion.Afertech.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,16 +11,17 @@ import java.time.LocalDate;
 @Setter
 public class PurchaseOrderRequest {
 
-    @NotBlank
-    private String company;
+    @NotNull
+    private Long clientId;
 
-    @NotBlank
+    @NotNull
     private String purchaseOrderNumber;
 
     @NotNull
     private LocalDate issueDate;
 
-    private String projectNumber;
+    @NotNull
+    private Long projectId;
 
     @NotNull
     private BigDecimal totalWithoutTax;

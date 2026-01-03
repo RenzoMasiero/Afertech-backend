@@ -17,9 +17,13 @@ public interface FixedCostMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "costType.id", target = "costTypeId")
     @Mapping(source = "costType.name", target = "costTypeName")
+    @Mapping(source = "employee.id", target = "employeeId")
+    @Mapping(expression = "java(fixedCost.getEmployee() != null ? fixedCost.getEmployee().getFirstName() + \" \" + fixedCost.getEmployee().getLastName() : null)", target = "employeeName")
     @Mapping(source = "amount", target = "amount")
     @Mapping(source = "allocationMonth", target = "allocationMonth")
     @Mapping(source = "paymentDate", target = "paymentDate")
     @Mapping(source = "description", target = "description")
+    @Mapping(source = "loadedAt", target = "loadedAt")
+    @Mapping(source = "loadedBy", target = "loadedBy")
     FixedCostResponse toResponse(FixedCost fixedCost);
 }

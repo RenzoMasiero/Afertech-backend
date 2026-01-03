@@ -12,17 +12,19 @@ import java.time.LocalDateTime;
 public class PurchaseOrderResponse {
 
     private Long id;
-    private String company;
+
+    private Long clientId;
+    private String clientName;
+
     private String purchaseOrderNumber;
     private LocalDate issueDate;
 
-    // Fecha de carga funcional
     private LocalDateTime loadedAt;
-
-    // Usuario que cargó
     private String loadedBy;
 
-    private String projectNumber;
+    private Long projectId;
+    private String projectName;
+
     private BigDecimal totalWithoutTax;
     private BigDecimal totalWithTax;
     private String description;

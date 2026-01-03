@@ -8,6 +8,8 @@ import com.facturacion.Afertech.repository.ClientRepository;
 import com.facturacion.Afertech.service.ClientService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,7 +43,13 @@ public class ClientServiceImpl implements ClientService {
             throw new RuntimeException("Client with this taxId already exists");
         }
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
         Client client = mapper.toEntity(request);
+        client.setLoadedBy(auth.getName());
+
         return mapper.toResponse(repository.save(client));
     }
 

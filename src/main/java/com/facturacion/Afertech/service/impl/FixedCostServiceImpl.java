@@ -4,8 +4,10 @@ import com.facturacion.Afertech.dto.FixedCostRequest;
 import com.facturacion.Afertech.dto.FixedCostResponse;
 import com.facturacion.Afertech.mapper.FixedCostMapper;
 import com.facturacion.Afertech.model.CostType;
+import com.facturacion.Afertech.model.Employee;
 import com.facturacion.Afertech.model.FixedCost;
 import com.facturacion.Afertech.repository.CostTypeRepository;
+import com.facturacion.Afertech.repository.EmployeeRepository;
 import com.facturacion.Afertech.repository.FixedCostRepository;
 import com.facturacion.Afertech.service.FixedCostService;
 import org.springframework.data.domain.Page;
@@ -21,15 +23,18 @@ public class FixedCostServiceImpl implements FixedCostService {
 
     private final FixedCostRepository repository;
     private final CostTypeRepository costTypeRepository;
+    private final EmployeeRepository employeeRepository;
     private final FixedCostMapper mapper;
 
     public FixedCostServiceImpl(
             FixedCostRepository repository,
             CostTypeRepository costTypeRepository,
+            EmployeeRepository employeeRepository,
             FixedCostMapper mapper
     ) {
         this.repository = repository;
         this.costTypeRepository = costTypeRepository;
+        this.employeeRepository = employeeRepository;
         this.mapper = mapper;
     }
 
@@ -49,9 +54,7 @@ public class FixedCostServiceImpl implements FixedCostService {
     @Override
     public FixedCostResponse create(FixedCostRequest request) {
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
@@ -62,6 +65,23 @@ public class FixedCostServiceImpl implements FixedCostService {
         fixedCost.setAllocationMonth(request.getAllocationMonth());
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
+
+        // 🔒 Regla SUELDO
+        if ("SALARY".equalsIgnoreCase(costType.getName()) ||
+                "SUELDO".equalsIgnoreCase(costType.getName())) {
+
+            if (request.getEmployeeId() == null) {
+                throw new RuntimeException("Employee is required for salary fixed cost");
+            }
+
+            Employee employee = employeeRepository.findById(request.getEmployeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            fixedCost.setEmployee(employee);
+        } else {
+            fixedCost.setEmployee(null);
+        }
+
         fixedCost.setLoadedBy(auth.getName());
 
         return mapper.toResponse(repository.save(fixedCost));
@@ -82,6 +102,22 @@ public class FixedCostServiceImpl implements FixedCostService {
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
 
+        // 🔒 Regla SUELDO
+        if ("SALARY".equalsIgnoreCase(costType.getName()) ||
+                "SUELDO".equalsIgnoreCase(costType.getName())) {
+
+            if (request.getEmployeeId() == null) {
+                throw new RuntimeException("Employee is required for salary fixed cost");
+            }
+
+            Employee employee = employeeRepository.findById(request.getEmployeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            fixedCost.setEmployee(employee);
+        } else {
+            fixedCost.setEmployee(null);
+        }
+
         return mapper.toResponse(repository.save(fixedCost));
     }
 
@@ -91,9 +127,7 @@ public class FixedCostServiceImpl implements FixedCostService {
         FixedCost fixedCost = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         fixedCost.setDeletedAt(LocalDateTime.now());
         fixedCost.setDeletedBy(auth.getName());

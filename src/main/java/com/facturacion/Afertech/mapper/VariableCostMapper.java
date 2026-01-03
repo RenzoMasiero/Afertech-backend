@@ -20,8 +20,12 @@ public interface VariableCostMapper {
     @Mapping(source = "amount", target = "amount")
     @Mapping(source = "allocationMonth", target = "allocationMonth")
     @Mapping(source = "paymentDate", target = "paymentDate")
-    @Mapping(source = "businessName", target = "businessName")
+    @Mapping(source = "supplier.id", target = "supplierId")
+    @Mapping(source = "supplier.name", target = "supplierName")
+    @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "project.name", target = "projectName")
     @Mapping(source = "description", target = "description")
-    @Mapping(source = "projectNumber", target = "projectNumber")
+    @Mapping(source = "loadedAt", target = "loadedAt")
+    @Mapping(source = "loadedBy", target = "loadedBy")
     VariableCostResponse toResponse(VariableCost variableCost);
 }

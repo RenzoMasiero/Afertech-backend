@@ -3,7 +3,11 @@ package com.facturacion.Afertech.service.impl;
 import com.facturacion.Afertech.dto.PurchaseOrderRequest;
 import com.facturacion.Afertech.dto.PurchaseOrderResponse;
 import com.facturacion.Afertech.mapper.PurchaseOrderMapper;
+import com.facturacion.Afertech.model.Client;
+import com.facturacion.Afertech.model.Project;
 import com.facturacion.Afertech.model.PurchaseOrder;
+import com.facturacion.Afertech.repository.ClientRepository;
+import com.facturacion.Afertech.repository.ProjectRepository;
 import com.facturacion.Afertech.repository.PurchaseOrderRepository;
 import com.facturacion.Afertech.service.PurchaseOrderService;
 import org.springframework.data.domain.Page;
@@ -18,73 +22,84 @@ import java.time.LocalDateTime;
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     private final PurchaseOrderRepository repository;
+    private final ClientRepository clientRepository;
+    private final ProjectRepository projectRepository;
     private final PurchaseOrderMapper mapper;
 
     public PurchaseOrderServiceImpl(
             PurchaseOrderRepository repository,
+            ClientRepository clientRepository,
+            ProjectRepository projectRepository,
             PurchaseOrderMapper mapper
     ) {
         this.repository = repository;
+        this.clientRepository = clientRepository;
+        this.projectRepository = projectRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Page<PurchaseOrderResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
     public PurchaseOrderResponse findById(Long id) {
-        PurchaseOrder purchaseOrder = repository.findById(id)
+        PurchaseOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
-        return mapper.toResponse(purchaseOrder);
+        return mapper.toResponse(po);
     }
 
     @Override
     public PurchaseOrderResponse create(PurchaseOrderRequest request) {
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        PurchaseOrder purchaseOrder = mapper.toEntity(request);
+        Client client = clientRepository.findById(request.getClientId())
+                .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        // dato funcional: quién cargó la orden de compra
-        purchaseOrder.setLoadedBy(auth.getName());
+        Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        return mapper.toResponse(repository.save(purchaseOrder));
+        PurchaseOrder po = mapper.toEntity(request);
+        po.setClient(client);
+        po.setProject(project);
+        po.setLoadedBy(auth.getName());
+
+        return mapper.toResponse(repository.save(po));
     }
 
     @Override
     public PurchaseOrderResponse update(Long id, PurchaseOrderRequest request) {
-        PurchaseOrder purchaseOrder = repository.findById(id)
+
+        PurchaseOrder existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
 
-        purchaseOrder.setCompany(request.getCompany());
-        purchaseOrder.setPurchaseOrderNumber(request.getPurchaseOrderNumber());
-        purchaseOrder.setIssueDate(request.getIssueDate());
-        purchaseOrder.setProjectNumber(request.getProjectNumber());
-        purchaseOrder.setTotalWithoutTax(request.getTotalWithoutTax());
-        purchaseOrder.setTotalWithTax(request.getTotalWithTax());
-        purchaseOrder.setDescription(request.getDescription());
+        Client client = clientRepository.findById(request.getClientId())
+                .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        return mapper.toResponse(repository.save(purchaseOrder));
+        Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        PurchaseOrder updated = mapper.toEntity(request);
+        updated.setId(existing.getId());
+        updated.setClient(client);
+        updated.setProject(project);
+
+        return mapper.toResponse(repository.save(updated));
     }
 
     @Override
     public void delete(Long id) {
 
-        PurchaseOrder purchaseOrder = repository.findById(id)
+        PurchaseOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        purchaseOrder.setDeletedAt(LocalDateTime.now());
-        purchaseOrder.setDeletedBy(auth.getName());
+        po.setDeletedAt(LocalDateTime.now());
+        po.setDeletedBy(auth.getName());
 
-        repository.save(purchaseOrder);
+        repository.save(po);
     }
 }

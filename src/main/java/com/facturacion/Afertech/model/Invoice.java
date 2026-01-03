@@ -20,23 +20,20 @@ public class Invoice extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Empresa emisora
-    @Column(nullable = false)
-    private String company;
+    // 🔗 Client
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
 
-    // Número de factura
     @Column(nullable = false)
     private String invoiceNumber;
 
-    // Fecha de la factura (del comprobante)
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Fecha de carga funcional
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
 
-    // Usuario que cargó (dato funcional)
     @Column(nullable = false, updatable = false)
     private String loadedBy;
 
@@ -49,14 +46,26 @@ public class Invoice extends BaseAuditableEntity {
     private BigDecimal totalWithTax;
 
     private Integer deferredPaymentDays;
-    private String projectNumber;
-    private String purchaseOrder;
+
+    // 🔗 Project
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
+    // 🔗 PurchaseOrder
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "purchase_order_id", nullable = false)
+    private PurchaseOrder purchaseOrder;
+
     private Integer purchaseOrderPercentage;
-    private String paymentOrder;
+
+    // 🔗 PaymentOrder (1–1 opcional)
+    @OneToOne
+    @JoinColumn(name = "payment_order_id")
+    private PaymentOrder paymentOrder;
 
     @PrePersist
     protected void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
-        // loadedBy se setea desde el service
     }
 }

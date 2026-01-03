@@ -17,19 +17,17 @@ public class VariableCostRequest {
     @NotNull
     private BigDecimal amount;
 
-    // Mes contable (ej: 2025-01-01)
     @NotNull
     private LocalDate allocationMonth;
 
-    // Fecha real de pago
     @NotNull
     private LocalDate paymentDate;
 
     @NotNull
-    private String businessName;
+    private Long supplierId;
 
     private String description;
 
-    // Solo requerido para algunos tipos (regla futura)
-    private String projectNumber;
+    // opcional
+    private Long projectId;
 }

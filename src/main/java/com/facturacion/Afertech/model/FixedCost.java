@@ -20,38 +20,36 @@ public class FixedCost extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Tipo de costo (Sueldo, ART, Alquiler, etc.)
+    // Tipo de costo
     @ManyToOne(optional = false)
-    @JoinColumn(name = "cost_type_id")
+    @JoinColumn(name = "cost_type_id", nullable = false)
     private CostType costType;
 
-    // Monto del costo
+    // 🔗 Employee (solo SUELDO)
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
+
     @Column(nullable = false)
     private BigDecimal amount;
 
-    // Mes al que se imputa el costo (ej: 2025-01-01)
     @Column(nullable = false)
     private LocalDate allocationMonth;
 
-    // Fecha real de pago
     @Column(nullable = false)
     private LocalDate paymentDate;
 
-    // Observaciones / detalle opcional
     @Column(length = 500)
     private String description;
 
-    // Fecha de carga funcional
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
 
-    // Usuario que cargó
     @Column(nullable = false, updatable = false)
     private String loadedBy;
 
     @PrePersist
     private void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
-        // loadedBy se setea desde el service
     }
 }

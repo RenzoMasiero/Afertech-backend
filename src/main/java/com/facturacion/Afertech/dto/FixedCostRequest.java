@@ -14,17 +14,17 @@ public class FixedCostRequest {
     @NotNull
     private Long costTypeId;
 
+    // solo si SUELDO
+    private Long employeeId;
+
     @NotNull
     private BigDecimal amount;
 
-    // Mes al que se imputa el costo (ej: 2025-01-01)
     @NotNull
     private LocalDate allocationMonth;
 
-    // Fecha real de pago
     @NotNull
     private LocalDate paymentDate;
 
     private String description;
 }
-
