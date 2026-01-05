@@ -15,5 +15,5 @@ public interface ClientService {
 
     ClientResponse update(Long id, ClientRequest request);
 
-    void deactivate(Long id);
+    void delete(Long id);
 }

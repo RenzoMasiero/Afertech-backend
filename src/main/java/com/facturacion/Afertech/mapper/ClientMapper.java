@@ -13,7 +13,7 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface ClientMapper {
 
-    // Request → Entity
+    // ========= Request → Entity =========
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -25,7 +25,10 @@ public interface ClientMapper {
     @Mapping(target = "loadedBy", ignore = true)
     Client toEntity(ClientRequest request);
 
-    // Entity → Response
+    // ========= Entity → Response =========
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "taxId", source = "taxId")
     @Mapping(target = "loadedAt", source = "loadedAt")
     @Mapping(target = "loadedBy", source = "loadedBy")
     ClientResponse toResponse(Client client);

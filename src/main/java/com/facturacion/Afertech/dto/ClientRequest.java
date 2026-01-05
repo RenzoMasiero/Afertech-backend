@@ -1,7 +1,6 @@
 package com.facturacion.Afertech.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +14,4 @@ public class ClientRequest {
     // CUIT
     @NotBlank
     private String taxId;
-
-    @NotNull
-    private Boolean active;
 }
