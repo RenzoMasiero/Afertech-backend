@@ -14,13 +14,9 @@ public class EmployeeResponse {
     private String firstName;
     private String lastName;
     private String documentNumber;
-    private boolean active;
     private LocalDate hireDate;
     private LocalDate terminationDate;
 
-    // Fecha de carga funcional
     private LocalDateTime loadedAt;
-
-    // Usuario que cargó
     private String loadedBy;
 }

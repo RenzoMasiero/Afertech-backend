@@ -8,7 +8,6 @@ import com.facturacion.Afertech.repository.*;
 import com.facturacion.Afertech.service.PaymentOrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -55,68 +54,88 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
     @Override
     public PaymentOrderResponse create(PaymentOrderRequest request) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        PaymentOrder po = new PaymentOrder();
 
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        po.setClient(
+                clientRepository.findById(request.getClientId())
+                        .orElseThrow(() -> new RuntimeException("Client not found"))
+        );
+        po.setProject(
+                projectRepository.findById(request.getProjectId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"))
+        );
 
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        Invoice invoice = null;
         if (request.getInvoiceId() != null) {
-            invoice = invoiceRepository.findById(request.getInvoiceId())
-                    .orElseThrow(() -> new RuntimeException("Invoice not found"));
+            po.setInvoice(
+                    invoiceRepository.findById(request.getInvoiceId())
+                            .orElseThrow(() -> new RuntimeException("Invoice not found"))
+            );
         }
 
-        PurchaseOrder po = null;
         if (request.getPurchaseOrderId() != null) {
-            po = purchaseOrderRepository.findById(request.getPurchaseOrderId())
-                    .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
+            po.setPurchaseOrder(
+                    purchaseOrderRepository.findById(request.getPurchaseOrderId())
+                            .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"))
+            );
         }
 
-        PaymentOrder paymentOrder = mapper.toEntity(request);
-        paymentOrder.setClient(client);
-        paymentOrder.setProject(project);
-        paymentOrder.setInvoice(invoice);
-        paymentOrder.setPurchaseOrder(po);
-        paymentOrder.setLoadedBy(auth.getName());
+        po.setPaymentOrderNumber(request.getPaymentOrderNumber());
+        po.setIssueDate(request.getIssueDate());
+        po.setTotalWithoutTax(request.getTotalWithoutTax());
+        po.setTotalWithTax(request.getTotalWithTax());
+        po.setConcept(request.getConcept());
+        po.setWithholdings(request.getWithholdings());
 
-        return mapper.toResponse(repository.save(paymentOrder));
+        po.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
+
+        return mapper.toResponse(repository.save(po));
     }
 
     @Override
     public PaymentOrderResponse update(Long id, PaymentOrderRequest request) {
 
-        PaymentOrder existing = repository.findById(id)
+        PaymentOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment order not found"));
 
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        po.setClient(
+                clientRepository.findById(request.getClientId())
+                        .orElseThrow(() -> new RuntimeException("Client not found"))
+        );
+        po.setProject(
+                projectRepository.findById(request.getProjectId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"))
+        );
 
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        Invoice invoice = null;
         if (request.getInvoiceId() != null) {
-            invoice = invoiceRepository.findById(request.getInvoiceId())
-                    .orElseThrow(() -> new RuntimeException("Invoice not found"));
+            po.setInvoice(
+                    invoiceRepository.findById(request.getInvoiceId())
+                            .orElseThrow(() -> new RuntimeException("Invoice not found"))
+            );
+        } else {
+            po.setInvoice(null);
         }
 
-        PurchaseOrder po = null;
         if (request.getPurchaseOrderId() != null) {
-            po = purchaseOrderRepository.findById(request.getPurchaseOrderId())
-                    .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
+            po.setPurchaseOrder(
+                    purchaseOrderRepository.findById(request.getPurchaseOrderId())
+                            .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"))
+            );
+        } else {
+            po.setPurchaseOrder(null);
         }
 
-        PaymentOrder updated = mapper.toEntity(request);
-        updated.setId(existing.getId());
-        updated.setClient(client);
-        updated.setProject(project);
-        updated.setInvoice(invoice);
-        updated.setPurchaseOrder(po);
+        po.setPaymentOrderNumber(request.getPaymentOrderNumber());
+        po.setIssueDate(request.getIssueDate());
+        po.setTotalWithoutTax(request.getTotalWithoutTax());
+        po.setTotalWithTax(request.getTotalWithTax());
+        po.setConcept(request.getConcept());
+        po.setWithholdings(request.getWithholdings());
 
-        return mapper.toResponse(repository.save(updated));
+        return mapper.toResponse(repository.save(po));
     }
 
     @Override
@@ -125,10 +144,19 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
         PaymentOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment order not found"));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // 🔒 Regla de negocio
+        if (po.getInvoice() != null) {
+            throw new RuntimeException(
+                    "Cannot delete payment order linked to an invoice"
+            );
+        }
 
         po.setDeletedAt(LocalDateTime.now());
-        po.setDeletedBy(auth.getName());
+        po.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         repository.save(po);
     }

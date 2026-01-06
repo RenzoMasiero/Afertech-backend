@@ -12,7 +12,6 @@ public class SupplierResponse {
     private Long id;
     private String name;
     private String taxId;
-    private boolean active;
 
     // Fecha de carga funcional
     private LocalDateTime loadedAt;

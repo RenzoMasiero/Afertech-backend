@@ -5,6 +5,10 @@ import com.facturacion.Afertech.dto.ProjectResponse;
 import com.facturacion.Afertech.mapper.ProjectMapper;
 import com.facturacion.Afertech.model.Project;
 import com.facturacion.Afertech.repository.ProjectRepository;
+import com.facturacion.Afertech.repository.PurchaseOrderRepository;
+import com.facturacion.Afertech.repository.InvoiceRepository;
+import com.facturacion.Afertech.repository.PaymentOrderRepository;
+import com.facturacion.Afertech.repository.VariableCostRepository;
 import com.facturacion.Afertech.service.ProjectService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +22,25 @@ import java.time.LocalDateTime;
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository repository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
+    private final VariableCostRepository variableCostRepository;
     private final ProjectMapper mapper;
 
-    public ProjectServiceImpl(ProjectRepository repository, ProjectMapper mapper) {
+    public ProjectServiceImpl(
+            ProjectRepository repository,
+            PurchaseOrderRepository purchaseOrderRepository,
+            InvoiceRepository invoiceRepository,
+            PaymentOrderRepository paymentOrderRepository,
+            VariableCostRepository variableCostRepository,
+            ProjectMapper mapper
+    ) {
         this.repository = repository;
+        this.purchaseOrderRepository = purchaseOrderRepository;
+        this.invoiceRepository = invoiceRepository;
+        this.paymentOrderRepository = paymentOrderRepository;
+        this.variableCostRepository = variableCostRepository;
         this.mapper = mapper;
     }
 
@@ -40,10 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse create(ProjectRequest request) {
-
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         Project project = mapper.toEntity(request);
         project.setLoadedBy(auth.getName());
@@ -68,9 +84,24 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        // 🔒 Reglas de negocio — MISMO PATRÓN QUE CLIENT
+        if (purchaseOrderRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException("Cannot delete project with existing purchase orders");
+        }
+
+        if (invoiceRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException("Cannot delete project with existing invoices");
+        }
+
+        if (paymentOrderRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException("Cannot delete project with existing payment orders");
+        }
+
+        if (variableCostRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException("Cannot delete project with existing variable costs");
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         project.setDeletedAt(LocalDateTime.now());
         project.setDeletedBy(auth.getName());

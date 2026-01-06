@@ -8,7 +8,6 @@ import com.facturacion.Afertech.repository.*;
 import com.facturacion.Afertech.service.InvoiceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +41,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Page<InvoiceResponse> findAll(Pageable pageable) {
-        return invoiceRepository.findAll(pageable).map(mapper::toResponse);
+        return invoiceRepository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -55,29 +55,41 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceResponse create(InvoiceRequest request) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Invoice invoice = new Invoice();
 
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        invoice.setClient(
+                clientRepository.findById(request.getClientId())
+                        .orElseThrow(() -> new RuntimeException("Client not found"))
+        );
+        invoice.setProject(
+                projectRepository.findById(request.getProjectId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"))
+        );
+        invoice.setPurchaseOrder(
+                purchaseOrderRepository.findById(request.getPurchaseOrderId())
+                        .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"))
+        );
 
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        PurchaseOrder po = purchaseOrderRepository.findById(request.getPurchaseOrderId())
-                .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
-
-        PaymentOrder paymentOrder = null;
         if (request.getPaymentOrderId() != null) {
-            paymentOrder = paymentOrderRepository.findById(request.getPaymentOrderId())
-                    .orElseThrow(() -> new RuntimeException("PaymentOrder not found"));
+            invoice.setPaymentOrder(
+                    paymentOrderRepository.findById(request.getPaymentOrderId())
+                            .orElseThrow(() -> new RuntimeException("PaymentOrder not found"))
+            );
         }
 
-        Invoice invoice = mapper.toEntity(request);
-        invoice.setClient(client);
-        invoice.setProject(project);
-        invoice.setPurchaseOrder(po);
-        invoice.setPaymentOrder(paymentOrder);
-        invoice.setLoadedBy(auth.getName());
+        invoice.setInvoiceNumber(request.getInvoiceNumber());
+        invoice.setIssueDate(request.getIssueDate());
+        invoice.setDescription(request.getDescription());
+        invoice.setTotalWithoutTax(request.getTotalWithoutTax());
+        invoice.setTotalWithTax(request.getTotalWithTax());
+        invoice.setDeferredPaymentDays(request.getDeferredPaymentDays());
+        invoice.setPurchaseOrderPercentage(request.getPurchaseOrderPercentage());
+
+        invoice.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         return mapper.toResponse(invoiceRepository.save(invoice));
     }
@@ -85,32 +97,40 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceResponse update(Long id, InvoiceRequest request) {
 
-        Invoice existing = invoiceRepository.findById(id)
+        Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        invoice.setClient(
+                clientRepository.findById(request.getClientId())
+                        .orElseThrow(() -> new RuntimeException("Client not found"))
+        );
+        invoice.setProject(
+                projectRepository.findById(request.getProjectId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"))
+        );
+        invoice.setPurchaseOrder(
+                purchaseOrderRepository.findById(request.getPurchaseOrderId())
+                        .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"))
+        );
 
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        PurchaseOrder po = purchaseOrderRepository.findById(request.getPurchaseOrderId())
-                .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
-
-        PaymentOrder paymentOrder = null;
         if (request.getPaymentOrderId() != null) {
-            paymentOrder = paymentOrderRepository.findById(request.getPaymentOrderId())
-                    .orElseThrow(() -> new RuntimeException("PaymentOrder not found"));
+            invoice.setPaymentOrder(
+                    paymentOrderRepository.findById(request.getPaymentOrderId())
+                            .orElseThrow(() -> new RuntimeException("PaymentOrder not found"))
+            );
+        } else {
+            invoice.setPaymentOrder(null);
         }
 
-        Invoice updated = mapper.toEntity(request);
-        updated.setId(existing.getId());
-        updated.setClient(client);
-        updated.setProject(project);
-        updated.setPurchaseOrder(po);
-        updated.setPaymentOrder(paymentOrder);
+        invoice.setInvoiceNumber(request.getInvoiceNumber());
+        invoice.setIssueDate(request.getIssueDate());
+        invoice.setDescription(request.getDescription());
+        invoice.setTotalWithoutTax(request.getTotalWithoutTax());
+        invoice.setTotalWithTax(request.getTotalWithTax());
+        invoice.setDeferredPaymentDays(request.getDeferredPaymentDays());
+        invoice.setPurchaseOrderPercentage(request.getPurchaseOrderPercentage());
 
-        return mapper.toResponse(invoiceRepository.save(updated));
+        return mapper.toResponse(invoiceRepository.save(invoice));
     }
 
     @Override
@@ -119,10 +139,19 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // 🔒 Regla de dependencia
+        if (paymentOrderRepository.existsByInvoiceIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException(
+                    "Cannot delete invoice with existing payment order"
+            );
+        }
 
         invoice.setDeletedAt(LocalDateTime.now());
-        invoice.setDeletedBy(auth.getName());
+        invoice.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         invoiceRepository.save(invoice);
     }

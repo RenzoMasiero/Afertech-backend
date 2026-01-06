@@ -5,21 +5,29 @@ import com.facturacion.Afertech.dto.SupplierResponse;
 import com.facturacion.Afertech.mapper.SupplierMapper;
 import com.facturacion.Afertech.model.Supplier;
 import com.facturacion.Afertech.repository.SupplierRepository;
+import com.facturacion.Afertech.repository.VariableCostRepository;
 import com.facturacion.Afertech.service.SupplierService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository repository;
+    private final VariableCostRepository variableCostRepository;
     private final SupplierMapper mapper;
 
-    public SupplierServiceImpl(SupplierRepository repository, SupplierMapper mapper) {
+    public SupplierServiceImpl(
+            SupplierRepository repository,
+            VariableCostRepository variableCostRepository,
+            SupplierMapper mapper
+    ) {
         this.repository = repository;
+        this.variableCostRepository = variableCostRepository;
         this.mapper = mapper;
     }
 
@@ -43,12 +51,12 @@ public class SupplierServiceImpl implements SupplierService {
             throw new RuntimeException("Supplier with this taxId already exists");
         }
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
         Supplier supplier = mapper.toEntity(request);
-        supplier.setLoadedBy(auth.getName());
+        supplier.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         return mapper.toResponse(repository.save(supplier));
     }
@@ -66,17 +74,30 @@ public class SupplierServiceImpl implements SupplierService {
 
         supplier.setName(request.getName());
         supplier.setTaxId(request.getTaxId());
-        supplier.setActive(request.getActive());
+
+        // ⚠️ active ya NO se usa como concepto de negocio
 
         return mapper.toResponse(repository.save(supplier));
     }
 
     @Override
-    public void deactivate(Long id) {
+    public void delete(Long id) {
+
         Supplier supplier = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
-        supplier.setActive(false);
+        // 🔒 Regla de negocio (igual que Client)
+        if (variableCostRepository.existsBySupplierIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException("Cannot delete supplier with existing variable costs");
+        }
+
+        supplier.setDeletedAt(LocalDateTime.now());
+        supplier.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
+
         repository.save(supplier);
     }
 }

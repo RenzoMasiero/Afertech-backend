@@ -17,7 +17,6 @@ public class EmployeeRequest {
     @NotBlank
     private String lastName;
 
-    // DNI / legajo
     @NotBlank
     private String documentNumber;
 
@@ -25,7 +24,4 @@ public class EmployeeRequest {
     private LocalDate hireDate;
 
     private LocalDate terminationDate;
-
-    @NotNull
-    private Boolean active;
 }

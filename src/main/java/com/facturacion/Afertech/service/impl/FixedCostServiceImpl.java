@@ -66,9 +66,9 @@ public class FixedCostServiceImpl implements FixedCostService {
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
 
-        // 🔒 Regla SUELDO
-        if ("SALARY".equalsIgnoreCase(costType.getName()) ||
-                "SUELDO".equalsIgnoreCase(costType.getName())) {
+        // 🔒 Regla SUELDO (create)
+        if ("SALARY".equalsIgnoreCase(costType.getName())
+                || "SUELDO".equalsIgnoreCase(costType.getName())) {
 
             if (request.getEmployeeId() == null) {
                 throw new RuntimeException("Employee is required for salary fixed cost");
@@ -78,8 +78,6 @@ public class FixedCostServiceImpl implements FixedCostService {
                     .orElseThrow(() -> new RuntimeException("Employee not found"));
 
             fixedCost.setEmployee(employee);
-        } else {
-            fixedCost.setEmployee(null);
         }
 
         fixedCost.setLoadedBy(auth.getName());
@@ -93,19 +91,33 @@ public class FixedCostServiceImpl implements FixedCostService {
         FixedCost fixedCost = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
 
-        CostType costType = costTypeRepository.findById(request.getCostTypeId())
+        CostType newCostType = costTypeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
-        fixedCost.setCostType(costType);
+        boolean wasSalary =
+                fixedCost.getCostType() != null &&
+                        ("SALARY".equalsIgnoreCase(fixedCost.getCostType().getName())
+                                || "SUELDO".equalsIgnoreCase(fixedCost.getCostType().getName()));
+
+        boolean isSalary =
+                "SALARY".equalsIgnoreCase(newCostType.getName())
+                        || "SUELDO".equalsIgnoreCase(newCostType.getName());
+
+        // 🔒 Regla B: no se puede pasar de SUELDO a otro tipo
+        if (wasSalary && !isSalary) {
+            throw new RuntimeException(
+                    "Cannot change cost type from SALARY to a non-salary type"
+            );
+        }
+
+        fixedCost.setCostType(newCostType);
         fixedCost.setAmount(request.getAmount());
         fixedCost.setAllocationMonth(request.getAllocationMonth());
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
 
-        // 🔒 Regla SUELDO
-        if ("SALARY".equalsIgnoreCase(costType.getName()) ||
-                "SUELDO".equalsIgnoreCase(costType.getName())) {
-
+        // 🔒 Regla SUELDO (update)
+        if (isSalary) {
             if (request.getEmployeeId() == null) {
                 throw new RuntimeException("Employee is required for salary fixed cost");
             }
@@ -114,8 +126,6 @@ public class FixedCostServiceImpl implements FixedCostService {
                     .orElseThrow(() -> new RuntimeException("Employee not found"));
 
             fixedCost.setEmployee(employee);
-        } else {
-            fixedCost.setEmployee(null);
         }
 
         return mapper.toResponse(repository.save(fixedCost));

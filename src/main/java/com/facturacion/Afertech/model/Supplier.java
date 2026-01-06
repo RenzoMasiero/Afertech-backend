@@ -31,9 +31,6 @@ public class Supplier extends BaseAuditableEntity {
     @Column(name = "tax_id", nullable = false, unique = true)
     private String taxId;
 
-    @Column(nullable = false)
-    private boolean active = true;
-
     // Fecha de carga funcional
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;

@@ -5,21 +5,29 @@ import com.facturacion.Afertech.dto.EmployeeResponse;
 import com.facturacion.Afertech.mapper.EmployeeMapper;
 import com.facturacion.Afertech.model.Employee;
 import com.facturacion.Afertech.repository.EmployeeRepository;
+import com.facturacion.Afertech.repository.FixedCostRepository;
 import com.facturacion.Afertech.service.EmployeeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository repository;
+    private final FixedCostRepository fixedCostRepository;
     private final EmployeeMapper mapper;
 
-    public EmployeeServiceImpl(EmployeeRepository repository, EmployeeMapper mapper) {
+    public EmployeeServiceImpl(
+            EmployeeRepository repository,
+            FixedCostRepository fixedCostRepository,
+            EmployeeMapper mapper
+    ) {
         this.repository = repository;
+        this.fixedCostRepository = fixedCostRepository;
         this.mapper = mapper;
     }
 
@@ -43,12 +51,12 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new RuntimeException("Employee with this document already exists");
         }
 
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
         Employee employee = mapper.toEntity(request);
-        employee.setLoadedBy(auth.getName());
+        employee.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         return mapper.toResponse(repository.save(employee));
     }
@@ -69,17 +77,31 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setDocumentNumber(request.getDocumentNumber());
         employee.setHireDate(request.getHireDate());
         employee.setTerminationDate(request.getTerminationDate());
-        employee.setActive(request.getActive());
 
         return mapper.toResponse(repository.save(employee));
     }
 
     @Override
-    public void deactivate(Long id) {
+    public void delete(Long id) {
+
         Employee employee = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        employee.setActive(false);
+        // 🔒 Regla SUELDO
+        if (fixedCostRepository
+                .existsByEmployeeIdAndCostType_NameIgnoreCaseAndDeletedAtIsNull(id, "SUELDO")) {
+            throw new RuntimeException(
+                    "Cannot delete employee with salary fixed costs"
+            );
+        }
+
+        employee.setDeletedAt(LocalDateTime.now());
+        employee.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
+
         repository.save(employee);
     }
 }

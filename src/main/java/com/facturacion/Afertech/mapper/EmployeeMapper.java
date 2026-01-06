@@ -13,7 +13,6 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface EmployeeMapper {
 
-    // Request → Entity
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -25,7 +24,6 @@ public interface EmployeeMapper {
     @Mapping(target = "loadedBy", ignore = true)
     Employee toEntity(EmployeeRequest request);
 
-    // Entity → Response
     @Mapping(target = "loadedAt", source = "loadedAt")
     @Mapping(target = "loadedBy", source = "loadedBy")
     EmployeeResponse toResponse(Employee employee);

@@ -7,12 +7,12 @@ import com.facturacion.Afertech.model.Client;
 import com.facturacion.Afertech.model.Project;
 import com.facturacion.Afertech.model.PurchaseOrder;
 import com.facturacion.Afertech.repository.ClientRepository;
+import com.facturacion.Afertech.repository.InvoiceRepository;
 import com.facturacion.Afertech.repository.ProjectRepository;
 import com.facturacion.Afertech.repository.PurchaseOrderRepository;
 import com.facturacion.Afertech.service.PurchaseOrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,23 +24,27 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final PurchaseOrderRepository repository;
     private final ClientRepository clientRepository;
     private final ProjectRepository projectRepository;
+    private final InvoiceRepository invoiceRepository;
     private final PurchaseOrderMapper mapper;
 
     public PurchaseOrderServiceImpl(
             PurchaseOrderRepository repository,
             ClientRepository clientRepository,
             ProjectRepository projectRepository,
+            InvoiceRepository invoiceRepository,
             PurchaseOrderMapper mapper
     ) {
         this.repository = repository;
         this.clientRepository = clientRepository;
         this.projectRepository = projectRepository;
+        this.invoiceRepository = invoiceRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Page<PurchaseOrderResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -53,8 +57,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     public PurchaseOrderResponse create(PurchaseOrderRequest request) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
         Client client = clientRepository.findById(request.getClientId())
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
@@ -64,7 +66,11 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         PurchaseOrder po = mapper.toEntity(request);
         po.setClient(client);
         po.setProject(project);
-        po.setLoadedBy(auth.getName());
+        po.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         return mapper.toResponse(repository.save(po));
     }
@@ -72,7 +78,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     public PurchaseOrderResponse update(Long id, PurchaseOrderRequest request) {
 
-        PurchaseOrder existing = repository.findById(id)
+        PurchaseOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
 
         Client client = clientRepository.findById(request.getClientId())
@@ -81,12 +87,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        PurchaseOrder updated = mapper.toEntity(request);
-        updated.setId(existing.getId());
-        updated.setClient(client);
-        updated.setProject(project);
+        // 🔒 Update manual (regla del sistema)
+        po.setClient(client);
+        po.setProject(project);
+        po.setPurchaseOrderNumber(request.getPurchaseOrderNumber());
+        po.setIssueDate(request.getIssueDate());
+        po.setTotalWithoutTax(request.getTotalWithoutTax());
+        po.setTotalWithTax(request.getTotalWithTax());
+        po.setDescription(request.getDescription());
 
-        return mapper.toResponse(repository.save(updated));
+        return mapper.toResponse(repository.save(po));
     }
 
     @Override
@@ -95,10 +105,19 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         PurchaseOrder po = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase order not found"));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // 🔒 Regla de dependencia
+        if (invoiceRepository.existsByPurchaseOrderIdAndDeletedAtIsNull(id)) {
+            throw new RuntimeException(
+                    "Cannot delete purchase order with existing invoices"
+            );
+        }
 
         po.setDeletedAt(LocalDateTime.now());
-        po.setDeletedBy(auth.getName());
+        po.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         repository.save(po);
     }

@@ -35,12 +35,9 @@ public class Employee extends BaseAuditableEntity {
     private String documentNumber;
 
     @Column(nullable = false)
-    private boolean active = true;
-
-    @Column(nullable = false)
     private LocalDate hireDate;
 
-    // Fecha de baja (si corresponde)
+    // Fecha de baja (NO se toca)
     private LocalDate terminationDate;
 
     // Fecha de carga funcional
@@ -54,6 +51,5 @@ public class Employee extends BaseAuditableEntity {
     @PrePersist
     private void onPrePersist() {
         this.loadedAt = LocalDateTime.now();
-        // loadedBy se setea desde el service
     }
 }
