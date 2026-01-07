@@ -34,5 +34,18 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    /**
+     * Reglas de negocio / dependencias de dominio
+     * (ej: intentar borrar entidad con dependencias)
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleBusinessConflict(
+            IllegalStateException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409
+                .body(ex.getMessage());
+    }
+
     // ❗ NO capturar RuntimeException genérica
 }

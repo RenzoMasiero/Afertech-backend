@@ -90,7 +90,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 🔒 Regla SUELDO
         if (fixedCostRepository
                 .existsByEmployeeIdAndCostType_NameIgnoreCaseAndDeletedAtIsNull(id, "SUELDO")) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Cannot delete employee with salary fixed costs"
             );
         }

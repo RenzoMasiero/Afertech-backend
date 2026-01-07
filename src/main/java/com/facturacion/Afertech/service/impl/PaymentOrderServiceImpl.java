@@ -146,7 +146,7 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
 
         // 🔒 Regla de negocio
         if (po.getInvoice() != null) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Cannot delete payment order linked to an invoice"
             );
         }

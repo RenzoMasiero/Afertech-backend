@@ -74,7 +74,7 @@ public class CostTypeServiceImpl implements CostTypeService {
 
         // 🔒 Regla de negocio
         if (fixedCostRepository.existsByCostTypeIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete cost type with existing fixed costs");
+            throw new IllegalStateException("Cannot delete cost type with existing fixed costs");
         }
 
         costType.setDeletedAt(LocalDateTime.now());

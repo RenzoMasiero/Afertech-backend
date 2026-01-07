@@ -87,7 +87,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // 🔒 Update manual (regla del sistema)
         po.setClient(client);
         po.setProject(project);
         po.setPurchaseOrderNumber(request.getPurchaseOrderNumber());
@@ -107,7 +106,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         // 🔒 Regla de dependencia
         if (invoiceRepository.existsByPurchaseOrderIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Cannot delete purchase order with existing invoices"
             );
         }

@@ -74,7 +74,7 @@ public class VariableCostTypeServiceImpl implements VariableCostTypeService {
 
         // 🔒 Regla de negocio
         if (variableCostRepository.existsByCostTypeIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Cannot delete variable cost type with existing variable costs"
             );
         }

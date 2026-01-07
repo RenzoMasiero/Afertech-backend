@@ -141,7 +141,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         // 🔒 Regla de dependencia
         if (paymentOrderRepository.existsByInvoiceIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Cannot delete invoice with existing payment order"
             );
         }

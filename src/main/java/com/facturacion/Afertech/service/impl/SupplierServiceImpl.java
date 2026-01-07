@@ -75,8 +75,6 @@ public class SupplierServiceImpl implements SupplierService {
         supplier.setName(request.getName());
         supplier.setTaxId(request.getTaxId());
 
-        // ⚠️ active ya NO se usa como concepto de negocio
-
         return mapper.toResponse(repository.save(supplier));
     }
 
@@ -86,9 +84,11 @@ public class SupplierServiceImpl implements SupplierService {
         Supplier supplier = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
-        // 🔒 Regla de negocio (igual que Client)
+        // 🔒 Regla de negocio
         if (variableCostRepository.existsBySupplierIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete supplier with existing variable costs");
+            throw new IllegalStateException(
+                    "Cannot delete supplier with existing variable costs"
+            );
         }
 
         supplier.setDeletedAt(LocalDateTime.now());

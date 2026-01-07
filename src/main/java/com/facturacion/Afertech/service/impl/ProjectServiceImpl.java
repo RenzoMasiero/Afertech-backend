@@ -84,21 +84,21 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // 🔒 Reglas de negocio — MISMO PATRÓN QUE CLIENT
+        // 🔒 Reglas de negocio — dependencias
         if (purchaseOrderRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete project with existing purchase orders");
+            throw new IllegalStateException("Cannot delete project with existing purchase orders");
         }
 
         if (invoiceRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete project with existing invoices");
+            throw new IllegalStateException("Cannot delete project with existing invoices");
         }
 
         if (paymentOrderRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete project with existing payment orders");
+            throw new IllegalStateException("Cannot delete project with existing payment orders");
         }
 
         if (variableCostRepository.existsByProjectIdAndDeletedAtIsNull(id)) {
-            throw new RuntimeException("Cannot delete project with existing variable costs");
+            throw new IllegalStateException("Cannot delete project with existing variable costs");
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

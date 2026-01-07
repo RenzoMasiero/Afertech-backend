@@ -86,7 +86,7 @@ public class ClientServiceImpl implements ClientService {
         // 🔒 Regla de negocio:
         // No se permite borrar un Client con Invoices asociadas
         if (invoiceRepository.existsByClientId(id)) {
-            throw new RuntimeException("Cannot delete client with existing invoices");
+            throw new IllegalStateException("Cannot delete client with existing invoices");
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
