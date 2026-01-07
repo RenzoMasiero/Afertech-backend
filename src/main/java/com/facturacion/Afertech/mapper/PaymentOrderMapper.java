@@ -30,9 +30,15 @@ public interface PaymentOrderMapper {
 
     @Mapping(target = "clientId", source = "client.id")
     @Mapping(target = "clientName", source = "client.name")
+
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "projectName", source = "project.name")
+
     @Mapping(target = "invoiceId", source = "invoice.id")
+    @Mapping(target = "invoiceNumber", source = "invoice.invoiceNumber")
+
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
+    @Mapping(target = "purchaseOrderNumber", source = "purchaseOrder.purchaseOrderNumber")
     PaymentOrderResponse toResponse(PaymentOrder paymentOrder);
 }
+

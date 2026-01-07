@@ -30,9 +30,14 @@ public interface InvoiceMapper {
 
     @Mapping(target = "clientId", source = "client.id")
     @Mapping(target = "clientName", source = "client.name")
+
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "projectName", source = "project.name")
+
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
+    @Mapping(target = "purchaseOrderNumber", source = "purchaseOrder.purchaseOrderNumber")
+
     @Mapping(target = "paymentOrderId", source = "paymentOrder.id")
+    @Mapping(target = "paymentOrderNumber", source = "paymentOrder.paymentOrderNumber")
     InvoiceResponse toResponse(Invoice invoice);
 }

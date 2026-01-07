@@ -31,7 +31,10 @@ public class PaymentOrderResponse {
     private String concept;
 
     private Long invoiceId;
+    private String invoiceNumber;
+
     private Long purchaseOrderId;
+    private String purchaseOrderNumber;
 
     private BigDecimal withholdings;
 }

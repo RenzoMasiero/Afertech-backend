@@ -31,7 +31,9 @@ public class InvoiceResponse {
     private String projectName;
 
     private Long purchaseOrderId;
+    private String purchaseOrderNumber;
     private Integer purchaseOrderPercentage;
 
     private Long paymentOrderId;
+    private String paymentOrderNumber;
 }
