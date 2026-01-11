@@ -47,6 +47,9 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
+                        // 🔹 CORS PREFLIGHT → SIEMPRE PERMITIDO
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Públicos
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
 
