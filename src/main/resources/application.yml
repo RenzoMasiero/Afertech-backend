@@ -9,7 +9,8 @@ spring:
       ddl-auto: update
 
 server:
-  port: ${PORT:8080}
+  port: 8080
 
 jwt:
   expiration: 3600000 # 1 hora
+
