@@ -60,10 +60,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/**")
                         .hasAnyRole("ADMIN", "USER")
 
-                        // POST → reglas ya existentes
-                        .requestMatchers(HttpMethod.POST, "/invoices/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/projects/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/**").hasRole("ADMIN")
+                        // POST → ADMIN y USER (REGRA DE CONTRATO)
+                        .requestMatchers(HttpMethod.POST, "/**")
+                        .hasAnyRole("ADMIN", "USER")
 
                         .anyRequest().authenticated()
                 )
