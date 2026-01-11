@@ -37,7 +37,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // 🔹 CORS (ANTES de security)
+                // 🔹 CORS habilitado (Spring Security)
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf.disable())
@@ -47,26 +47,31 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔹 CORS PREFLIGHT → SIEMPRE PERMITIDO
+                        // 🔹 CORS PREFLIGHT — OBLIGATORIO
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Públicos
+                        // 🔹 Públicos
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
 
-                        // USERS → SOLO ADMIN
+                        // 🔹 USERS → SOLO ADMIN
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // DELETE → solo ADMIN
+                        // 🔹 DELETE → solo ADMIN
                         .requestMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
 
-                        // GET → ADMIN o USER
+                        // 🔹 GET → ADMIN o USER
                         .requestMatchers(HttpMethod.GET, "/**")
                         .hasAnyRole("ADMIN", "USER")
 
-                        // POST → reglas ya existentes
-                        .requestMatchers(HttpMethod.POST, "/invoices/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/projects/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/**").hasRole("ADMIN")
+                        // 🔹 POST → reglas existentes
+                        .requestMatchers(HttpMethod.POST, "/invoices/**")
+                        .hasAnyRole("ADMIN", "USER")
+
+                        .requestMatchers(HttpMethod.POST, "/projects/**")
+                        .hasAnyRole("ADMIN", "USER")
+
+                        .requestMatchers(HttpMethod.POST, "/**")
+                        .hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
@@ -86,7 +91,10 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173"
+                        // 👉 cuando el front esté en prod, se agrega acá el dominio real
+                )
         );
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
