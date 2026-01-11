@@ -37,7 +37,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // 🔹 CORS habilitado (Spring Security)
+                // 🔹 CORS habilitado en Security
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf.disable())
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔹 CORS PREFLIGHT — OBLIGATORIO
+                        // 🔹 CORS PREFLIGHT (OBLIGATORIO)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 🔹 Públicos
@@ -84,7 +84,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔹 CORS GLOBAL CONFIG
+    // 🔹 CORS GLOBAL CONFIG (REAL)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -92,8 +92,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(
                 List.of(
-                        "http://localhost:5173"
-                        // 👉 cuando el front esté en prod, se agrega acá el dominio real
+                        "http://localhost:5173",
+                        "https://afertech-frontend-production.up.railway.app"
                 )
         );
         config.setAllowedMethods(
