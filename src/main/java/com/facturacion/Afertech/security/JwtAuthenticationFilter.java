@@ -9,7 +9,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -66,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                   "error": "invalid_or_expired_token"
                 }
                 """);
-            return;
+            return; // ⛔ cortamos la filter chain
         }
 
         if (username != null
@@ -92,15 +91,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder
                         .getContext()
                         .setAuthentication(authToken);
-
-                // 🔎 LOGS DE DEBUG (SOLO OBSERVABILIDAD)
-                Authentication auth =
-                        SecurityContextHolder.getContext().getAuthentication();
-
-                System.out.println("=== JWT AUTH DEBUG ===");
-                System.out.println("USER: " + auth.getName());
-                System.out.println("AUTHORITIES: " + auth.getAuthorities());
-                System.out.println("======================");
             }
         }
 
