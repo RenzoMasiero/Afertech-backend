@@ -12,50 +12,44 @@ import java.util.List;
 
 /**
  * Repository de solo lectura para reporting financiero mensual.
- * ❌ No lógica de negocio
- * ❌ No cálculos temporales complejos
  */
 public interface MonthlyFinancialReportRepository extends JpaRepository<PaymentOrder, Long> {
 
-    /**
-     * INGRESOS (base):
-     * Trae PaymentOrders por issueDate.
-     * El cálculo de cashInDate (issueDate + deferredPaymentDays)
-     * y el filtrado final por mes se hacen en el Service.
-     */
+    // =========================
+    // INGRESOS (REGLA FINAL)
+    // =========================
     @Query("""
         SELECT po
         FROM PaymentOrder po
-        WHERE po.issueDate BETWEEN :from AND :to
+        WHERE po.executed = true
+          AND po.executionDate BETWEEN :from AND :to
     """)
-    List<PaymentOrder> findPaymentOrdersIssuedBetween(
+    List<PaymentOrder> findExecutedPaymentOrdersBetween(
             @Param("from") LocalDate from,
             @Param("to") LocalDate to
     );
 
-    /**
-     * COSTOS FIJOS del mes (allocationMonth)
-     */
+    // =========================
+    // COSTOS FIJOS
+    // =========================
     @Query("""
         SELECT fc
         FROM FixedCost fc
-        WHERE fc.allocationMonth BETWEEN :from AND :to
+        WHERE fc.allocationMonth = :allocationMonth
     """)
-    List<FixedCost> findFixedCostsBetween(
-            @Param("from") LocalDate from,
-            @Param("to") LocalDate to
+    List<FixedCost> findFixedCostsByAllocationMonth(
+            @Param("allocationMonth") String allocationMonth
     );
 
-    /**
-     * COSTOS VARIABLES del mes (allocationMonth)
-     */
+    // =========================
+    // COSTOS VARIABLES
+    // =========================
     @Query("""
         SELECT vc
         FROM VariableCost vc
-        WHERE vc.allocationMonth BETWEEN :from AND :to
+        WHERE vc.allocationMonth = :allocationMonth
     """)
-    List<VariableCost> findVariableCostsBetween(
-            @Param("from") LocalDate from,
-            @Param("to") LocalDate to
+    List<VariableCost> findVariableCostsByAllocationMonth(
+            @Param("allocationMonth") String allocationMonth
     );
 }
