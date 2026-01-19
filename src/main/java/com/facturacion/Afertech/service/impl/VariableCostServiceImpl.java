@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class VariableCostServiceImpl implements VariableCostService {
@@ -70,6 +72,8 @@ public class VariableCostServiceImpl implements VariableCostService {
                     .orElseThrow(() -> new RuntimeException("Project not found"));
         }
 
+        validateAllocationMonth(request.getAllocationMonth());
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         VariableCost cost = new VariableCost();
@@ -103,6 +107,8 @@ public class VariableCostServiceImpl implements VariableCostService {
                     .orElseThrow(() -> new RuntimeException("Project not found"));
         }
 
+        validateAllocationMonth(request.getAllocationMonth());
+
         cost.setCostType(type);
         cost.setAmount(request.getAmount());
         cost.setAllocationMonth(request.getAllocationMonth());
@@ -126,5 +132,22 @@ public class VariableCostServiceImpl implements VariableCostService {
         cost.setDeletedBy(auth.getName());
 
         repository.save(cost);
+    }
+
+    // ==========================
+    // Validación de dominio
+    // ==========================
+    private void validateAllocationMonth(String allocationMonth) {
+        if (allocationMonth == null) {
+            throw new RuntimeException("Allocation month is required");
+        }
+
+        try {
+            YearMonth.parse(allocationMonth); // espera YYYY-MM
+        } catch (DateTimeParseException ex) {
+            throw new RuntimeException(
+                    "Invalid allocationMonth format. Expected YYYY-MM"
+            );
+        }
     }
 }

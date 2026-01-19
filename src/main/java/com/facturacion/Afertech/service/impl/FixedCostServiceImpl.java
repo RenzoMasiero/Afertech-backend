@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class FixedCostServiceImpl implements FixedCostService {
@@ -58,6 +60,8 @@ public class FixedCostServiceImpl implements FixedCostService {
 
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
+
+        validateAllocationMonth(request.getAllocationMonth());
 
         FixedCost fixedCost = new FixedCost();
         fixedCost.setCostType(costType);
@@ -110,6 +114,8 @@ public class FixedCostServiceImpl implements FixedCostService {
             );
         }
 
+        validateAllocationMonth(request.getAllocationMonth());
+
         fixedCost.setCostType(newCostType);
         fixedCost.setAmount(request.getAmount());
         fixedCost.setAllocationMonth(request.getAllocationMonth());
@@ -143,5 +149,22 @@ public class FixedCostServiceImpl implements FixedCostService {
         fixedCost.setDeletedBy(auth.getName());
 
         repository.save(fixedCost);
+    }
+
+    // ==========================
+    // Validación de dominio
+    // ==========================
+    private void validateAllocationMonth(String allocationMonth) {
+        if (allocationMonth == null) {
+            throw new RuntimeException("Allocation month is required");
+        }
+
+        try {
+            YearMonth.parse(allocationMonth); // espera YYYY-MM
+        } catch (DateTimeParseException ex) {
+            throw new RuntimeException(
+                    "Invalid allocationMonth format. Expected YYYY-MM"
+            );
+        }
     }
 }

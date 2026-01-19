@@ -31,6 +31,13 @@ public class PaymentOrder extends BaseAuditableEntity {
     @Column(nullable = false)
     private LocalDate issueDate;
 
+    // Estado de ejecución
+    @Column(nullable = false)
+    private boolean executed = false;
+
+    // Fecha de ejecución (obligatoria si executed = true)
+    private LocalDate executionDate;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime loadedAt;
 

@@ -33,8 +33,9 @@ public class FixedCost extends BaseAuditableEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(nullable = false)
-    private LocalDate allocationMonth;
+    // Mes de imputación en formato YYYY-MM
+    @Column(nullable = false, length = 7)
+    private String allocationMonth;
 
     @Column(nullable = false)
     private LocalDate paymentDate;

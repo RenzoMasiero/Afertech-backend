@@ -17,8 +17,9 @@ public class VariableCostRequest {
     @NotNull
     private BigDecimal amount;
 
+    // Mes de imputación en formato YYYY-MM
     @NotNull
-    private LocalDate allocationMonth;
+    private String allocationMonth;
 
     @NotNull
     private LocalDate paymentDate;

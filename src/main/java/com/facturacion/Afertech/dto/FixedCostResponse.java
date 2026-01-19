@@ -20,7 +20,10 @@ public class FixedCostResponse {
     private String employeeName;
 
     private BigDecimal amount;
-    private LocalDate allocationMonth;
+
+    // Mes de imputación en formato YYYY-MM
+    private String allocationMonth;
+
     private LocalDate paymentDate;
     private String description;
 
