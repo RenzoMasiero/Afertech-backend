@@ -35,4 +35,11 @@ public class PaymentOrderRequest {
     private Long purchaseOrderId;
 
     private BigDecimal withholdings;
+
+    // Estado de ejecución
+    @NotNull
+    private Boolean executed;
+
+    // Obligatoria si executed = true
+    private LocalDate executionDate;
 }

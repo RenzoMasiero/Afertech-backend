@@ -79,6 +79,11 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
             );
         }
 
+        // ==========================
+        // Regla executed / executionDate
+        // ==========================
+        applyExecutionRule(po, request);
+
         po.setPaymentOrderNumber(request.getPaymentOrderNumber());
         po.setIssueDate(request.getIssueDate());
         po.setTotalWithoutTax(request.getTotalWithoutTax());
@@ -128,6 +133,11 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
             po.setPurchaseOrder(null);
         }
 
+        // ==========================
+        // Regla executed / executionDate
+        // ==========================
+        applyExecutionRule(po, request);
+
         po.setPaymentOrderNumber(request.getPaymentOrderNumber());
         po.setIssueDate(request.getIssueDate());
         po.setTotalWithoutTax(request.getTotalWithoutTax());
@@ -159,5 +169,28 @@ public class PaymentOrderServiceImpl implements PaymentOrderService {
         );
 
         repository.save(po);
+    }
+
+    // ==========================
+    // Regla de dominio centralizada
+    // ==========================
+    private void applyExecutionRule(PaymentOrder po, PaymentOrderRequest request) {
+
+        if (request.getExecuted() == null) {
+            throw new RuntimeException("Executed flag is required");
+        }
+
+        if (request.getExecuted()) {
+            if (request.getExecutionDate() == null) {
+                throw new RuntimeException(
+                        "Execution date is required when payment order is executed"
+                );
+            }
+            po.setExecuted(true);
+            po.setExecutionDate(request.getExecutionDate());
+        } else {
+            po.setExecuted(false);
+            po.setExecutionDate(null);
+        }
     }
 }

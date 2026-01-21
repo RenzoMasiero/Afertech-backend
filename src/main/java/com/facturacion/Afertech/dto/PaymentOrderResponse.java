@@ -19,6 +19,10 @@ public class PaymentOrderResponse {
     private String paymentOrderNumber;
     private LocalDate issueDate;
 
+    // Estado de ejecución
+    private boolean executed;
+    private LocalDate executionDate;
+
     private LocalDateTime loadedAt;
     private String loadedBy;
 

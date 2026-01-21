@@ -27,15 +27,13 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
 
         LocalDate from = month.atDay(1);
         LocalDate to = month.atEndOfMonth();
+        String allocationMonth = month.toString();
 
         // =========================
-        // INGRESOS
+        // INGRESOS (criterio nuevo)
         // =========================
         List<PaymentOrder> paymentOrders =
-                repository.findPaymentOrdersIssuedBetween(
-                        from.minusMonths(1),
-                        to.plusMonths(1)
-                );
+                repository.findExecutedPaymentOrdersBetween(from, to);
 
         List<IncomeItemResponse> incomeItems = new ArrayList<>();
         BigDecimal totalIncomeWithTax = BigDecimal.ZERO;
@@ -43,20 +41,10 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
 
         for (PaymentOrder po : paymentOrders) {
 
-            LocalDate cashInDate = po.getIssueDate();
-
-            if (po.getInvoice() != null && po.getInvoice().getDeferredPaymentDays() != null) {
-                cashInDate = po.getIssueDate().plusDays(po.getInvoice().getDeferredPaymentDays());
-            }
-
-            if (cashInDate.isBefore(from) || cashInDate.isAfter(to)) {
-                continue;
-            }
-
             IncomeItemResponse item = new IncomeItemResponse();
             item.setPaymentOrderId(po.getId());
             item.setPaymentOrderNumber(po.getPaymentOrderNumber());
-            item.setCashInDate(cashInDate);
+            item.setCashInDate(po.getExecutionDate());
             item.setAmountWithTax(po.getTotalWithTax());
             item.setAmountWithoutTax(po.getTotalWithoutTax());
 
@@ -74,7 +62,7 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
         // COSTOS FIJOS
         // =========================
         List<FixedCost> fixedCosts =
-                repository.findFixedCostsBetween(from, to);
+                repository.findFixedCostsByAllocationMonth(allocationMonth);
 
         List<FixedCostItemResponse> fixedCostItems = new ArrayList<>();
         BigDecimal totalFixedCosts = BigDecimal.ZERO;
@@ -84,7 +72,10 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
             FixedCostItemResponse item = new FixedCostItemResponse();
             item.setFixedCostId(fc.getId());
             item.setCostTypeName(fc.getCostType().getName());
-            item.setAllocationMonth(fc.getAllocationMonth().toString());
+
+            // día real del costo (campo existente)
+            item.setAllocationMonth(fc.getPaymentDate().toString());
+
             item.setAmount(fc.getAmount());
             item.setSalary(fc.getEmployee() != null);
 
@@ -96,7 +87,7 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
         // COSTOS VARIABLES
         // =========================
         List<VariableCost> variableCosts =
-                repository.findVariableCostsBetween(from, to);
+                repository.findVariableCostsByAllocationMonth(allocationMonth);
 
         List<VariableCostItemResponse> variableCostItems = new ArrayList<>();
         BigDecimal totalVariableCosts = BigDecimal.ZERO;
@@ -106,7 +97,10 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
             VariableCostItemResponse item = new VariableCostItemResponse();
             item.setVariableCostId(vc.getId());
             item.setCostTypeName(vc.getCostType().getName());
-            item.setAllocationMonth(vc.getAllocationMonth().toString());
+
+            // día real del costo (campo existente)
+            item.setAllocationMonth(vc.getPaymentDate().toString());
+
             item.setAmount(vc.getAmount());
             item.setSupplierName(vc.getSupplier().getName());
 
@@ -120,7 +114,7 @@ public class MonthlyFinancialReportServiceImpl implements MonthlyFinancialReport
         // RESPUESTA
         // =========================
         MonthlyFinancialSummaryResponse response = new MonthlyFinancialSummaryResponse();
-        response.setMonth(month.toString());
+        response.setMonth(allocationMonth);
 
         response.setIncomes(incomeItems);
         response.setTotalIncomeWithTax(totalIncomeWithTax);

@@ -13,21 +13,32 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface PaymentOrderMapper {
 
+    // ==========================
+    // Request → Entity
+    // ==========================
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "client", ignore = true)
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "invoice", ignore = true)
     @Mapping(target = "purchaseOrder", ignore = true)
+
+    // auditoría técnica
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+
+    // datos funcionales
     @Mapping(target = "loadedAt", ignore = true)
     @Mapping(target = "loadedBy", ignore = true)
+
     PaymentOrder toEntity(PaymentOrderRequest request);
 
+    // ==========================
+    // Entity → Response
+    // ==========================
     @Mapping(target = "clientId", source = "client.id")
     @Mapping(target = "clientName", source = "client.name")
 
@@ -39,6 +50,10 @@ public interface PaymentOrderMapper {
 
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
     @Mapping(target = "purchaseOrderNumber", source = "purchaseOrder.purchaseOrderNumber")
+
+    // estado de ejecución
+    @Mapping(target = "executed", source = "executed")
+    @Mapping(target = "executionDate", source = "executionDate")
+
     PaymentOrderResponse toResponse(PaymentOrder paymentOrder);
 }
-
