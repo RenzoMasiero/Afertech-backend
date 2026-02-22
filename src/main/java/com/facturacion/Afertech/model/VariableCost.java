@@ -20,7 +20,6 @@ public class VariableCost extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Tipo de costo variable
     @ManyToOne(optional = false)
     @JoinColumn(name = "variable_cost_type_id", nullable = false)
     private VariableCostType costType;
@@ -31,19 +30,28 @@ public class VariableCost extends BaseAuditableEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    // Mes de imputación en formato YYYY-MM
+    // 💵 MODELO MONETARIO (igual patrón Invoice)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency_original", nullable = false)
+    private Currency currencyOriginal;
+
+    @Column(name = "exchange_rate_used", precision = 15, scale = 2)
+    private BigDecimal exchangeRateUsed;
+
+    @Column(name = "amount_usd", precision = 15, scale = 2)
+    private BigDecimal amountUsd;
+
     @Column(nullable = false, length = 7)
     private String allocationMonth;
 
     @Column(nullable = false)
     private LocalDate paymentDate;
 
-    // 🔗 Supplier
     @ManyToOne(optional = false)
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 
-    // 🔗 Project
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;

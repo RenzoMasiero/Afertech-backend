@@ -1,8 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: prod
-
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
@@ -12,7 +8,7 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
 jwt:
   secret: ${JWT_SECRET}
@@ -20,18 +16,12 @@ jwt:
 logging:
   level:
     root: ERROR
-
-    # Spring framework (silencia warnings informativos)
     org.springframework: ERROR
     org.springframework.web: ERROR
     org.springframework.security: ERROR
     org.springframework.security.config: ERROR
-
-    # Hibernate / JPA
     org.hibernate: ERROR
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
-
-    # Tomcat
     org.apache.catalina: ERROR
     org.apache.tomcat: ERROR

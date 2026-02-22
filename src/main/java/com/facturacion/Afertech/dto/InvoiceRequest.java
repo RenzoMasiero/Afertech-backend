@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,9 @@ public class InvoiceRequest {
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal totalWithTax;
+
+    @NotNull
+    private Currency currencyOriginal;
 
     @NotNull
     @Min(0)

@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +30,9 @@ public class PaymentOrderRequest {
     @NotNull
     private BigDecimal totalWithTax;
 
+    @NotNull
+    private Currency currencyOriginal;
+
     private String concept;
 
     private Long invoiceId;
@@ -36,10 +40,8 @@ public class PaymentOrderRequest {
 
     private BigDecimal withholdings;
 
-    // Estado de ejecución
     @NotNull
     private Boolean executed;
 
-    // Obligatoria si executed = true
     private LocalDate executionDate;
 }

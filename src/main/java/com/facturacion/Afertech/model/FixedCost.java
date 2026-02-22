@@ -20,12 +20,10 @@ public class FixedCost extends BaseAuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Tipo de costo
     @ManyToOne(optional = false)
     @JoinColumn(name = "cost_type_id", nullable = false)
     private CostType costType;
 
-    // 🔗 Employee (solo SUELDO)
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
@@ -33,7 +31,18 @@ public class FixedCost extends BaseAuditableEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    // Mes de imputación en formato YYYY-MM
+    // 💵 MODELO MONETARIO (igual patrón Invoice)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency_original", nullable = false)
+    private Currency currencyOriginal;
+
+    @Column(name = "exchange_rate_used", precision = 15, scale = 2)
+    private BigDecimal exchangeRateUsed;
+
+    @Column(name = "amount_usd", precision = 15, scale = 2)
+    private BigDecimal amountUsd;
+
     @Column(nullable = false, length = 7)
     private String allocationMonth;
 

@@ -14,16 +14,37 @@ import org.mapstruct.ReportingPolicy;
 public interface FixedCostMapper {
 
     @BeanMapping(ignoreByDefault = true)
+
+    // Identidad
     @Mapping(source = "id", target = "id")
+
+    // CostType
     @Mapping(source = "costType.id", target = "costTypeId")
     @Mapping(source = "costType.name", target = "costTypeName")
+
+    // Employee
     @Mapping(source = "employee.id", target = "employeeId")
-    @Mapping(expression = "java(fixedCost.getEmployee() != null ? fixedCost.getEmployee().getFirstName() + \" \" + fixedCost.getEmployee().getLastName() : null)", target = "employeeName")
+    @Mapping(
+            expression = "java(fixedCost.getEmployee() != null ? fixedCost.getEmployee().getFirstName() + \" \" + fixedCost.getEmployee().getLastName() : null)",
+            target = "employeeName"
+    )
+
+    // Monto original
     @Mapping(source = "amount", target = "amount")
+
+    // 💵 MODELO MONETARIO (OBLIGATORIO)
+    @Mapping(source = "currencyOriginal", target = "currencyOriginal")
+    @Mapping(source = "exchangeRateUsed", target = "exchangeRateUsed")
+    @Mapping(source = "amountUsd", target = "amountUsd")
+
+    // Dominio funcional
     @Mapping(source = "allocationMonth", target = "allocationMonth")
     @Mapping(source = "paymentDate", target = "paymentDate")
     @Mapping(source = "description", target = "description")
+
+    // Datos funcionales
     @Mapping(source = "loadedAt", target = "loadedAt")
     @Mapping(source = "loadedBy", target = "loadedBy")
+
     FixedCostResponse toResponse(FixedCost fixedCost);
 }
