@@ -37,7 +37,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // 🔹 CORS (ANTES de security)
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf.disable())
@@ -46,6 +45,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+
+                        // 🔹 PREVENT CORS BLOCK
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Públicos
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
@@ -60,10 +62,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/**")
                         .hasAnyRole("ADMIN", "USER")
 
-                        // POST → reglas ya existentes
-                        .requestMatchers(HttpMethod.POST, "/invoices/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/projects/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/**").hasRole("ADMIN")
+                        // POST específicos
+                        .requestMatchers(HttpMethod.POST, "/invoices/**")
+                        .hasAnyRole("ADMIN", "USER")
+
+                        .requestMatchers(HttpMethod.POST, "/projects/**")
+                        .hasAnyRole("ADMIN", "USER")
+
+                        // POST general → ADMIN
+                        .requestMatchers(HttpMethod.POST, "/**")
+                        .hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
@@ -83,18 +91,26 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        "https://afertech-frontend-production.up.railway.app",
+                        "https://afertech-frontend-dev-web.up.railway.app"
+                )
         );
+
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );
+
         config.setAllowedHeaders(
                 List.of("Content-Type", "Authorization")
         );
+
         config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", config);
 
         return source;
