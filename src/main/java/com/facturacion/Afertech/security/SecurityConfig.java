@@ -46,7 +46,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔹 PREVENT CORS BLOCK
+                        // 🔹 CORS PREFLIGHT
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Públicos
@@ -69,7 +69,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/projects/**")
                         .hasAnyRole("ADMIN", "USER")
 
-                        // POST general → ADMIN
                         .requestMatchers(HttpMethod.POST, "/**")
                         .hasRole("ADMIN")
 
@@ -84,19 +83,24 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔹 CORS GLOBAL CONFIG
+    // 🔹 CORS GLOBAL CONFIG (SIN HARDCODE)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173",
-                        "https://afertech-frontend-production.up.railway.app",
-                        "https://afertech-frontend-dev-web.up.railway.app"
-                )
-        );
+        String allowedOriginsEnv = System.getenv("APP_CORS_ALLOWED_ORIGINS");
+
+        List<String> allowedOrigins;
+
+        if (allowedOriginsEnv != null && !allowedOriginsEnv.isBlank()) {
+            allowedOrigins = List.of(allowedOriginsEnv.split(","));
+        } else {
+            // fallback para desarrollo local
+            allowedOrigins = List.of("http://localhost:5173");
+        }
+
+        config.setAllowedOrigins(allowedOrigins);
 
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
