@@ -37,7 +37,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // 🔹 CORS habilitado en Security
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf.disable())
@@ -47,23 +46,23 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔹 CORS PREFLIGHT (OBLIGATORIO)
+                        // 🔹 CORS PREFLIGHT
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 🔹 Públicos
+                        // Públicos
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
 
-                        // 🔹 USERS → SOLO ADMIN
+                        // USERS → SOLO ADMIN
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // 🔹 DELETE → solo ADMIN
+                        // DELETE → solo ADMIN
                         .requestMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
 
-                        // 🔹 GET → ADMIN o USER
+                        // GET → ADMIN o USER
                         .requestMatchers(HttpMethod.GET, "/**")
                         .hasAnyRole("ADMIN", "USER")
 
-                        // 🔹 POST → reglas existentes
+                        // POST específicos
                         .requestMatchers(HttpMethod.POST, "/invoices/**")
                         .hasAnyRole("ADMIN", "USER")
 
@@ -84,28 +83,38 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔹 CORS GLOBAL CONFIG (REAL)
+    // 🔹 CORS GLOBAL CONFIG (SIN HARDCODE)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173",
-                        "https://afertech-frontend-production.up.railway.app"
-                )
-        );
+        String allowedOriginsEnv = System.getenv("APP_CORS_ALLOWED_ORIGINS");
+
+        List<String> allowedOrigins;
+
+        if (allowedOriginsEnv != null && !allowedOriginsEnv.isBlank()) {
+            allowedOrigins = List.of(allowedOriginsEnv.split(","));
+        } else {
+            // fallback para desarrollo local
+            allowedOrigins = List.of("http://localhost:5173");
+        }
+
+        config.setAllowedOrigins(allowedOrigins);
+
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );
+
         config.setAllowedHeaders(
                 List.of("Content-Type", "Authorization")
         );
+
         config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", config);
 
         return source;
