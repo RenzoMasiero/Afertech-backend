@@ -2,16 +2,16 @@ name: Build Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - dev
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Build Docker image
