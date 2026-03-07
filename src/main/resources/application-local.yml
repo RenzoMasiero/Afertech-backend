@@ -16,17 +16,5 @@ spring:
       enabled: true
       path: /h2-console
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: renzo.masiero.dev@gmail.com
-    password: xgfkucmnsuxxbjxd
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 jwt:
   secret: local-dev-secret-12345678901234567890

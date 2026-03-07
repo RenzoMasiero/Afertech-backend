@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   postgres:
-    image: postgres:16
+    image: postgres:15
     container_name: afertech-postgres
     restart: always
     environment:
@@ -27,11 +27,17 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/afertech
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      JWT_SECRET: change_this_secret
       SPRING_PROFILES_ACTIVE: prod
+
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
     ports:
       - "8080:8080"
 
