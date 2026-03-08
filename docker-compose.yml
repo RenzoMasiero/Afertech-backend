@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   postgres:
@@ -28,18 +26,23 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-
       DB_URL: ${DB_URL}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-
       JWT_SECRET: ${JWT_SECRET}
-
       MAIL_USER: ${MAIL_USER}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
-
     ports:
       - "8080:8080"
+
+  frontend:
+    build:
+      context: C:/Users/Renzo/Documents/FrontEnd/Afertech/afertech-frontend
+    container_name: afertech-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
 
 volumes:
   postgres_data:

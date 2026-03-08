@@ -38,7 +38,6 @@ public class SecurityConfig {
 
         http
                 .cors(Customizer.withDefaults())
-
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session ->
@@ -46,7 +45,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔹 CORS PREFLIGHT
+                        // CORS PREFLIGHT
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Públicos
@@ -83,7 +82,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔹 CORS GLOBAL CONFIG (SIN HARDCODE)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -96,8 +94,11 @@ public class SecurityConfig {
         if (allowedOriginsEnv != null && !allowedOriginsEnv.isBlank()) {
             allowedOrigins = List.of(allowedOriginsEnv.split(","));
         } else {
-            // fallback para desarrollo local
-            allowedOrigins = List.of("http://localhost:5173");
+            // desarrollo local
+            allowedOrigins = List.of(
+                    "http://localhost:5173",
+                    "http://localhost:3000"
+            );
         }
 
         config.setAllowedOrigins(allowedOrigins);
