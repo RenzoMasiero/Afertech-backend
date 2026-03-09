@@ -42,6 +42,21 @@ public class PurchaseOrder extends BaseAuditableEntity {
     @Column(nullable = false)
     private BigDecimal totalWithTax;
 
+    // 💵 --- MODELO MONETARIO ---
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency_original", nullable = false)
+    private Currency currencyOriginal;
+
+    @Column(name = "exchange_rate_used", precision = 15, scale = 2)
+    private BigDecimal exchangeRateUsed;
+
+    @Column(name = "total_without_tax_usd", precision = 15, scale = 2)
+    private BigDecimal totalWithoutTaxUsd;
+
+    @Column(name = "total_with_tax_usd", precision = 15, scale = 2)
+    private BigDecimal totalWithTaxUsd;
+
     @Column(length = 500)
     private String description;
 

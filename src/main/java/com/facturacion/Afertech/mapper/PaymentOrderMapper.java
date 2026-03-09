@@ -22,6 +22,11 @@ public interface PaymentOrderMapper {
     @Mapping(target = "invoice", ignore = true)
     @Mapping(target = "purchaseOrder", ignore = true)
 
+    // 💵 campos calculados por Service
+    @Mapping(target = "exchangeRateUsed", ignore = true)
+    @Mapping(target = "totalWithoutTaxUsd", ignore = true)
+    @Mapping(target = "totalWithTaxUsd", ignore = true)
+
     // auditoría técnica
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -54,6 +59,12 @@ public interface PaymentOrderMapper {
     // estado de ejecución
     @Mapping(target = "executed", source = "executed")
     @Mapping(target = "executionDate", source = "executionDate")
+
+    // 💵 modelo monetario
+    @Mapping(target = "currencyOriginal", source = "currencyOriginal")
+    @Mapping(target = "exchangeRateUsed", source = "exchangeRateUsed")
+    @Mapping(target = "totalWithoutTaxUsd", source = "totalWithoutTaxUsd")
+    @Mapping(target = "totalWithTaxUsd", source = "totalWithTaxUsd")
 
     PaymentOrderResponse toResponse(PaymentOrder paymentOrder);
 }

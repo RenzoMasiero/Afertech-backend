@@ -14,18 +14,32 @@ import org.mapstruct.ReportingPolicy;
 public interface VariableCostMapper {
 
     @BeanMapping(ignoreByDefault = true)
+
     @Mapping(source = "id", target = "id")
+
     @Mapping(source = "costType.id", target = "costTypeId")
     @Mapping(source = "costType.name", target = "costTypeName")
+
     @Mapping(source = "amount", target = "amount")
+
+    // 💵 MODELO MONETARIO
+    @Mapping(source = "currencyOriginal", target = "currencyOriginal")
+    @Mapping(source = "exchangeRateUsed", target = "exchangeRateUsed")
+    @Mapping(source = "amountUsd", target = "amountUsd")
+
     @Mapping(source = "allocationMonth", target = "allocationMonth")
     @Mapping(source = "paymentDate", target = "paymentDate")
+
     @Mapping(source = "supplier.id", target = "supplierId")
     @Mapping(source = "supplier.name", target = "supplierName")
+
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "project.name", target = "projectName")
+
     @Mapping(source = "description", target = "description")
+
     @Mapping(source = "loadedAt", target = "loadedAt")
     @Mapping(source = "loadedBy", target = "loadedBy")
+
     VariableCostResponse toResponse(VariableCost variableCost);
 }

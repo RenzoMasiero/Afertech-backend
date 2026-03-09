@@ -5,12 +5,15 @@ import com.facturacion.Afertech.dto.InvoiceResponse;
 import com.facturacion.Afertech.mapper.InvoiceMapper;
 import com.facturacion.Afertech.model.*;
 import com.facturacion.Afertech.repository.*;
+import com.facturacion.Afertech.service.ExchangeRateService;
 import com.facturacion.Afertech.service.InvoiceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Service
@@ -21,6 +24,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final ProjectRepository projectRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PaymentOrderRepository paymentOrderRepository;
+    private final ExchangeRateService exchangeRateService;
     private final InvoiceMapper mapper;
 
     public InvoiceServiceImpl(
@@ -29,6 +33,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             ProjectRepository projectRepository,
             PurchaseOrderRepository purchaseOrderRepository,
             PaymentOrderRepository paymentOrderRepository,
+            ExchangeRateService exchangeRateService,
             InvoiceMapper mapper
     ) {
         this.invoiceRepository = invoiceRepository;
@@ -36,6 +41,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         this.projectRepository = projectRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.paymentOrderRepository = paymentOrderRepository;
+        this.exchangeRateService = exchangeRateService;
         this.mapper = mapper;
     }
 
@@ -85,6 +91,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setDeferredPaymentDays(request.getDeferredPaymentDays());
         invoice.setPurchaseOrderPercentage(request.getPurchaseOrderPercentage());
 
+        invoice.setCurrencyOriginal(request.getCurrencyOriginal());
+
+        applyMonetaryLogic(invoice);
+
         invoice.setLoadedBy(
                 SecurityContextHolder.getContext()
                         .getAuthentication()
@@ -130,7 +140,45 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setDeferredPaymentDays(request.getDeferredPaymentDays());
         invoice.setPurchaseOrderPercentage(request.getPurchaseOrderPercentage());
 
+        invoice.setCurrencyOriginal(request.getCurrencyOriginal());
+
+        applyMonetaryLogic(invoice);
+
         return mapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    private void applyMonetaryLogic(Invoice invoice) {
+
+        if (invoice.getCurrencyOriginal() == Currency.USD) {
+
+            invoice.setExchangeRateUsed(BigDecimal.ONE);
+
+            invoice.setTotalWithoutTaxUsd(
+                    invoice.getTotalWithoutTax().setScale(2, RoundingMode.HALF_UP)
+            );
+
+            invoice.setTotalWithTaxUsd(
+                    invoice.getTotalWithTax().setScale(2, RoundingMode.HALF_UP)
+            );
+
+        } else {
+
+            ExchangeRate rate = exchangeRateService.getByDate(invoice.getIssueDate());
+
+            BigDecimal exchangeRate = rate.getUsdArsRate();
+
+            invoice.setExchangeRateUsed(exchangeRate);
+
+            invoice.setTotalWithoutTaxUsd(
+                    invoice.getTotalWithoutTax()
+                            .divide(exchangeRate, 2, RoundingMode.HALF_UP)
+            );
+
+            invoice.setTotalWithTaxUsd(
+                    invoice.getTotalWithTax()
+                            .divide(exchangeRate, 2, RoundingMode.HALF_UP)
+            );
+        }
     }
 
     @Override
@@ -139,7 +187,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        // 🔒 Regla de dependencia
         if (paymentOrderRepository.existsByInvoiceIdAndDeletedAtIsNull(id)) {
             throw new IllegalStateException(
                     "Cannot delete invoice with existing payment order"

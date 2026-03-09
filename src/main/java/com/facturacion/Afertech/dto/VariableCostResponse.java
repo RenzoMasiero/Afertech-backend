@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,9 +19,12 @@ public class VariableCostResponse {
 
     private BigDecimal amount;
 
-    // Mes de imputación en formato YYYY-MM
-    private String allocationMonth;
+    // 💵 Modelo monetario
+    private Currency currencyOriginal;
+    private BigDecimal exchangeRateUsed;
+    private BigDecimal amountUsd;
 
+    private String allocationMonth;
     private LocalDate paymentDate;
 
     private Long supplierId;

@@ -3,19 +3,19 @@ package com.facturacion.Afertech.service.impl;
 import com.facturacion.Afertech.dto.FixedCostRequest;
 import com.facturacion.Afertech.dto.FixedCostResponse;
 import com.facturacion.Afertech.mapper.FixedCostMapper;
-import com.facturacion.Afertech.model.CostType;
-import com.facturacion.Afertech.model.Employee;
-import com.facturacion.Afertech.model.FixedCost;
+import com.facturacion.Afertech.model.*;
 import com.facturacion.Afertech.repository.CostTypeRepository;
 import com.facturacion.Afertech.repository.EmployeeRepository;
 import com.facturacion.Afertech.repository.FixedCostRepository;
+import com.facturacion.Afertech.service.ExchangeRateService;
 import com.facturacion.Afertech.service.FixedCostService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -26,17 +26,20 @@ public class FixedCostServiceImpl implements FixedCostService {
     private final FixedCostRepository repository;
     private final CostTypeRepository costTypeRepository;
     private final EmployeeRepository employeeRepository;
+    private final ExchangeRateService exchangeRateService;
     private final FixedCostMapper mapper;
 
     public FixedCostServiceImpl(
             FixedCostRepository repository,
             CostTypeRepository costTypeRepository,
             EmployeeRepository employeeRepository,
+            ExchangeRateService exchangeRateService,
             FixedCostMapper mapper
     ) {
         this.repository = repository;
         this.costTypeRepository = costTypeRepository;
         this.employeeRepository = employeeRepository;
+        this.exchangeRateService = exchangeRateService;
         this.mapper = mapper;
     }
 
@@ -56,21 +59,21 @@ public class FixedCostServiceImpl implements FixedCostService {
     @Override
     public FixedCostResponse create(FixedCostRequest request) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        FixedCost fixedCost = new FixedCost();
 
         CostType costType = costTypeRepository.findById(request.getCostTypeId())
                 .orElseThrow(() -> new RuntimeException("Cost type not found"));
 
         validateAllocationMonth(request.getAllocationMonth());
 
-        FixedCost fixedCost = new FixedCost();
         fixedCost.setCostType(costType);
         fixedCost.setAmount(request.getAmount());
+        fixedCost.setCurrencyOriginal(request.getCurrencyOriginal());
         fixedCost.setAllocationMonth(request.getAllocationMonth());
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
 
-        // 🔒 Regla SUELDO (create)
+        // 🔒 Regla SUELDO
         if ("SALARY".equalsIgnoreCase(costType.getName())
                 || "SUELDO".equalsIgnoreCase(costType.getName())) {
 
@@ -84,7 +87,13 @@ public class FixedCostServiceImpl implements FixedCostService {
             fixedCost.setEmployee(employee);
         }
 
-        fixedCost.setLoadedBy(auth.getName());
+        applyMonetaryLogic(fixedCost);
+
+        fixedCost.setLoadedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         return mapper.toResponse(repository.save(fixedCost));
     }
@@ -107,7 +116,6 @@ public class FixedCostServiceImpl implements FixedCostService {
                 "SALARY".equalsIgnoreCase(newCostType.getName())
                         || "SUELDO".equalsIgnoreCase(newCostType.getName());
 
-        // 🔒 Regla B: no se puede pasar de SUELDO a otro tipo
         if (wasSalary && !isSalary) {
             throw new RuntimeException(
                     "Cannot change cost type from SALARY to a non-salary type"
@@ -118,11 +126,11 @@ public class FixedCostServiceImpl implements FixedCostService {
 
         fixedCost.setCostType(newCostType);
         fixedCost.setAmount(request.getAmount());
+        fixedCost.setCurrencyOriginal(request.getCurrencyOriginal());
         fixedCost.setAllocationMonth(request.getAllocationMonth());
         fixedCost.setPaymentDate(request.getPaymentDate());
         fixedCost.setDescription(request.getDescription());
 
-        // 🔒 Regla SUELDO (update)
         if (isSalary) {
             if (request.getEmployeeId() == null) {
                 throw new RuntimeException("Employee is required for salary fixed cost");
@@ -134,6 +142,8 @@ public class FixedCostServiceImpl implements FixedCostService {
             fixedCost.setEmployee(employee);
         }
 
+        applyMonetaryLogic(fixedCost);
+
         return mapper.toResponse(repository.save(fixedCost));
     }
 
@@ -143,24 +153,50 @@ public class FixedCostServiceImpl implements FixedCostService {
         FixedCost fixedCost = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Fixed cost not found"));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
         fixedCost.setDeletedAt(LocalDateTime.now());
-        fixedCost.setDeletedBy(auth.getName());
+        fixedCost.setDeletedBy(
+                SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getName()
+        );
 
         repository.save(fixedCost);
     }
 
-    // ==========================
-    // Validación de dominio
-    // ==========================
+    private void applyMonetaryLogic(FixedCost fixedCost) {
+
+        if (fixedCost.getCurrencyOriginal() == Currency.USD) {
+
+            fixedCost.setExchangeRateUsed(BigDecimal.ONE);
+
+            fixedCost.setAmountUsd(
+                    fixedCost.getAmount()
+                            .setScale(2, RoundingMode.HALF_UP)
+            );
+
+        } else {
+
+            ExchangeRate rate =
+                    exchangeRateService.getByDate(fixedCost.getPaymentDate());
+
+            BigDecimal exchangeRate = rate.getUsdArsRate();
+
+            fixedCost.setExchangeRateUsed(exchangeRate);
+
+            fixedCost.setAmountUsd(
+                    fixedCost.getAmount()
+                            .divide(exchangeRate, 2, RoundingMode.HALF_UP)
+            );
+        }
+    }
+
     private void validateAllocationMonth(String allocationMonth) {
         if (allocationMonth == null) {
             throw new RuntimeException("Allocation month is required");
         }
 
         try {
-            YearMonth.parse(allocationMonth); // espera YYYY-MM
+            YearMonth.parse(allocationMonth);
         } catch (DateTimeParseException ex) {
             throw new RuntimeException(
                     "Invalid allocationMonth format. Expected YYYY-MM"

@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +20,6 @@ public class PaymentOrderResponse {
     private String paymentOrderNumber;
     private LocalDate issueDate;
 
-    // Estado de ejecución
     private boolean executed;
     private LocalDate executionDate;
 
@@ -31,6 +31,12 @@ public class PaymentOrderResponse {
 
     private BigDecimal totalWithoutTax;
     private BigDecimal totalWithTax;
+
+    // 💵 Modelo monetario
+    private Currency currencyOriginal;
+    private BigDecimal exchangeRateUsed;
+    private BigDecimal totalWithoutTaxUsd;
+    private BigDecimal totalWithTaxUsd;
 
     private String concept;
 

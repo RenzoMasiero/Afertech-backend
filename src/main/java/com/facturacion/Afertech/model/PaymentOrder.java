@@ -31,11 +31,9 @@ public class PaymentOrder extends BaseAuditableEntity {
     @Column(nullable = false)
     private LocalDate issueDate;
 
-    // Estado de ejecución
     @Column(nullable = false)
     private boolean executed = false;
 
-    // Fecha de ejecución (obligatoria si executed = true)
     private LocalDate executionDate;
 
     @Column(nullable = false, updatable = false)
@@ -55,15 +53,28 @@ public class PaymentOrder extends BaseAuditableEntity {
     @Column(nullable = false)
     private BigDecimal totalWithTax;
 
+    // 💵 --- MODELO MONETARIO ---
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency_original", nullable = false)
+    private Currency currencyOriginal;
+
+    @Column(name = "exchange_rate_used", precision = 15, scale = 2)
+    private BigDecimal exchangeRateUsed;
+
+    @Column(name = "total_without_tax_usd", precision = 15, scale = 2)
+    private BigDecimal totalWithoutTaxUsd;
+
+    @Column(name = "total_with_tax_usd", precision = 15, scale = 2)
+    private BigDecimal totalWithTaxUsd;
+
     @Column(length = 500)
     private String concept;
 
-    // 🔗 Invoice (1–1)
     @OneToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
 
-    // 🔗 PurchaseOrder
     @ManyToOne
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;

@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,9 @@ public class PurchaseOrderRequest {
 
     @NotNull
     private BigDecimal totalWithTax;
+
+    @NotNull
+    private Currency currencyOriginal;
 
     private String description;
 }

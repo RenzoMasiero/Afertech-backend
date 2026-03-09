@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.dto;
 
+import com.facturacion.Afertech.model.Currency;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,13 +15,14 @@ public class FixedCostRequest {
     @NotNull
     private Long costTypeId;
 
-    // solo si SUELDO
     private Long employeeId;
 
     @NotNull
     private BigDecimal amount;
 
-    // Mes de imputación en formato YYYY-MM
+    @NotNull
+    private Currency currencyOriginal;
+
     @NotNull
     private String allocationMonth;
 

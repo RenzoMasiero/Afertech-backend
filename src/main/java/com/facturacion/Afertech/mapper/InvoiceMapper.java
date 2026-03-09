@@ -18,12 +18,18 @@ public interface InvoiceMapper {
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "purchaseOrder", ignore = true)
     @Mapping(target = "paymentOrder", ignore = true)
+
+    @Mapping(target = "exchangeRateUsed", ignore = true)
+    @Mapping(target = "totalWithoutTaxUsd", ignore = true)
+    @Mapping(target = "totalWithTaxUsd", ignore = true)
+
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+
     @Mapping(target = "loadedAt", ignore = true)
     @Mapping(target = "loadedBy", ignore = true)
     Invoice toEntity(InvoiceRequest request);
@@ -39,5 +45,10 @@ public interface InvoiceMapper {
 
     @Mapping(target = "paymentOrderId", source = "paymentOrder.id")
     @Mapping(target = "paymentOrderNumber", source = "paymentOrder.paymentOrderNumber")
+
+    @Mapping(target = "currencyOriginal", source = "currencyOriginal")
+    @Mapping(target = "exchangeRateUsed", source = "exchangeRateUsed")
+    @Mapping(target = "totalWithoutTaxUsd", source = "totalWithoutTaxUsd")
+    @Mapping(target = "totalWithTaxUsd", source = "totalWithTaxUsd")
     InvoiceResponse toResponse(Invoice invoice);
 }
