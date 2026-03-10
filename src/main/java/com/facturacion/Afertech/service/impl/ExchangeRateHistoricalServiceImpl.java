@@ -45,15 +45,31 @@ public class ExchangeRateHistoricalServiceImpl implements ExchangeRateHistorical
 
             LocalDate date = LocalDate.parse((String) entry.get("date"));
 
+            // Respeta fecha mínima del sistema
             if (date.isBefore(MIN_DATE)) {
                 continue;
             }
 
+            // Respeta rango solicitado
+            if (start != null && date.isBefore(start)) {
+                continue;
+            }
+
+            if (end != null && date.isAfter(end)) {
+                continue;
+            }
+
+            // Evita duplicados
             if (repository.findByDateAndDeletedAtIsNull(date).isPresent()) {
                 continue;
             }
 
             Double sellValue = (Double) entry.get("value_sell");
+
+            // Protege contra valores nulos del API
+            if (sellValue == null) {
+                continue;
+            }
 
             ExchangeRate rate = new ExchangeRate();
             rate.setDate(date);
