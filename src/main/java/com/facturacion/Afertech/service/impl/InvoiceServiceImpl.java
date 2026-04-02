@@ -202,4 +202,26 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoiceRepository.save(invoice);
     }
+
+    @Override
+    public int backfillMissingMonetaryData() {
+        int updatedCount = 0;
+
+        for (Invoice invoice : invoiceRepository.findAll()) {
+            boolean missingMonetaryData =
+                    invoice.getExchangeRateUsed() == null
+                            || invoice.getTotalWithoutTaxUsd() == null
+                            || invoice.getTotalWithTaxUsd() == null;
+
+            if (!missingMonetaryData) {
+                continue;
+            }
+
+            applyMonetaryLogic(invoice);
+            invoiceRepository.save(invoice);
+            updatedCount++;
+        }
+
+        return updatedCount;
+    }
 }
