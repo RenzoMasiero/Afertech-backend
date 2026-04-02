@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -60,5 +61,11 @@ public class InvoiceController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admin/backfill-monetary")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Integer> backfillMissingMonetaryData() {
+        return ResponseEntity.ok(service.backfillMissingMonetaryData());
     }
 }

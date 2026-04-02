@@ -24,6 +24,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final ProjectRepository projectRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PaymentOrderRepository paymentOrderRepository;
+    private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRateService exchangeRateService;
     private final InvoiceMapper mapper;
 
@@ -33,6 +34,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             ProjectRepository projectRepository,
             PurchaseOrderRepository purchaseOrderRepository,
             PaymentOrderRepository paymentOrderRepository,
+            ExchangeRateRepository exchangeRateRepository,
             ExchangeRateService exchangeRateService,
             InvoiceMapper mapper
     ) {
@@ -41,6 +43,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         this.projectRepository = projectRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.paymentOrderRepository = paymentOrderRepository;
+        this.exchangeRateRepository = exchangeRateRepository;
         this.exchangeRateService = exchangeRateService;
         this.mapper = mapper;
     }
@@ -201,5 +204,70 @@ public class InvoiceServiceImpl implements InvoiceService {
         );
 
         invoiceRepository.save(invoice);
+    }
+
+    @Override
+    public int backfillMissingMonetaryData() {
+        int updatedCount = 0;
+
+        for (Invoice invoice : invoiceRepository.findAll()) {
+            boolean missingMonetaryData =
+                    invoice.getExchangeRateUsed() == null
+                            || invoice.getTotalWithoutTaxUsd() == null
+                            || invoice.getTotalWithTaxUsd() == null;
+
+            if (!missingMonetaryData) {
+                continue;
+            }
+
+            applyMonetaryLogicForBackfill(invoice);
+            invoiceRepository.save(invoice);
+            updatedCount++;
+        }
+
+        return updatedCount;
+    }
+
+    private void applyMonetaryLogicForBackfill(Invoice invoice) {
+        try {
+            applyMonetaryLogic(invoice);
+            return;
+        } catch (IllegalStateException ex) {
+            // fallback para históricos fuera de tolerancia
+        }
+
+        if (invoice.getCurrencyOriginal() == Currency.USD) {
+            invoice.setExchangeRateUsed(BigDecimal.ONE);
+            invoice.setTotalWithoutTaxUsd(
+                    invoice.getTotalWithoutTax().setScale(2, RoundingMode.HALF_UP)
+            );
+            invoice.setTotalWithTaxUsd(
+                    invoice.getTotalWithTax().setScale(2, RoundingMode.HALF_UP)
+            );
+            return;
+        }
+
+        ExchangeRate fallbackRate = exchangeRateRepository
+                .findTopByDateLessThanEqualAndDeletedAtIsNullOrderByDateDesc(invoice.getIssueDate())
+                .orElseThrow(() ->
+                        new RuntimeException("No exchange rate available before or equal to date: " + invoice.getIssueDate())
+                );
+
+        if (fallbackRate.getUsdArsRate() == null) {
+            throw new IllegalStateException(
+                    "Exchange rate is marked as unavailable for date: " + fallbackRate.getDate()
+            );
+        }
+
+        BigDecimal exchangeRate = fallbackRate.getUsdArsRate();
+        invoice.setExchangeRateUsed(exchangeRate);
+        invoice.setTotalWithoutTaxUsd(
+                invoice.getTotalWithoutTax()
+                        .divide(exchangeRate, 2, RoundingMode.HALF_UP)
+        );
+        invoice.setTotalWithTaxUsd(
+                invoice.getTotalWithTax()
+                        .divide(exchangeRate, 2, RoundingMode.HALF_UP)
+        );
     }
 }
