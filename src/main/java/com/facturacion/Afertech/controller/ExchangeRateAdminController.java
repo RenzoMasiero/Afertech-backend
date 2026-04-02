@@ -1,10 +1,12 @@
 package com.facturacion.Afertech.controller;
 
+import com.facturacion.Afertech.dto.ExchangeRateLoadResponse;
 import com.facturacion.Afertech.service.ExchangeRateHistoricalService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/exchange-rate")
@@ -18,10 +20,10 @@ public class ExchangeRateAdminController {
 
     @PostMapping("/load-historical")
     @PreAuthorize("hasRole('ADMIN')")
-    public void loadHistorical(
+    public List<ExchangeRateLoadResponse> loadHistorical(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end
     ) {
-        historicalService.loadFromTo(start, end);
+        return historicalService.loadFromTo(start, end);
     }
 }
