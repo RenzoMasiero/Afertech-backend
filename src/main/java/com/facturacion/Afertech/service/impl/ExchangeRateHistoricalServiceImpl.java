@@ -1,5 +1,6 @@
 package com.facturacion.Afertech.service.impl;
 
+import com.facturacion.Afertech.dto.ExchangeRateLoadResponse;
 import com.facturacion.Afertech.model.ExchangeRate;
 import com.facturacion.Afertech.repository.ExchangeRateRepository;
 import com.facturacion.Afertech.service.ExchangeRateHistoricalService;
@@ -9,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +27,10 @@ public class ExchangeRateHistoricalServiceImpl implements ExchangeRateHistorical
     }
 
     @Override
-    public void loadFromTo(LocalDate start, LocalDate end) {
+    public List<ExchangeRateLoadResponse> loadFromTo(LocalDate start, LocalDate end) {
 
         String url = "https://api.bluelytics.com.ar/v2/evolution.json";
+        List<ExchangeRateLoadResponse> loadedRates = new ArrayList<>();
 
         List<Map<String, Object>> response =
                 restTemplate.getForObject(url, List.class);
@@ -79,6 +82,13 @@ public class ExchangeRateHistoricalServiceImpl implements ExchangeRateHistorical
             );
 
             repository.save(rate);
+
+            ExchangeRateLoadResponse loaded = new ExchangeRateLoadResponse();
+            loaded.setDate(date);
+            loaded.setUsdArsRate(rate.getUsdArsRate());
+            loadedRates.add(loaded);
         }
+
+        return loadedRates;
     }
 }
