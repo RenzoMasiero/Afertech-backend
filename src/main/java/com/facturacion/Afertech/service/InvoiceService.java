@@ -16,4 +16,6 @@ public interface InvoiceService {
     InvoiceResponse update(Long id, InvoiceRequest request);
 
     void delete(Long id);
+
+    int backfillMissingMonetaryData();
 }
