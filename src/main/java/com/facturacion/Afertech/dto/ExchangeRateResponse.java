@@ -14,6 +14,6 @@ public class ExchangeRateResponse {
     private Long id;
     private LocalDate date;
     private BigDecimal usdArsRate;
-    private LocalDateTime loadedAt;
-    private String loadedBy;
+    private LocalDateTime createdAt;
+    private String createdBy;
 }

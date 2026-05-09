@@ -3,7 +3,6 @@ package com.facturacion.Afertech.mapper;
 import com.facturacion.Afertech.dto.ExchangeRateResponse;
 import com.facturacion.Afertech.model.ExchangeRate;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
@@ -12,7 +11,5 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface ExchangeRateMapper {
 
-    @Mapping(target = "loadedAt", source = "loadedAt")
-    @Mapping(target = "loadedBy", source = "loadedBy")
     ExchangeRateResponse toResponse(ExchangeRate exchangeRate);
 }
