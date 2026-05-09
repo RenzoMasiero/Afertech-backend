@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,4 +14,6 @@ public class ExchangeRateResponse {
     private Long id;
     private LocalDate date;
     private BigDecimal usdArsRate;
+    private LocalDateTime createdAt;
+    private String createdBy;
 }
