@@ -32,7 +32,7 @@ public class ExchangeRateReadServiceImpl implements ExchangeRateReadService {
     @Override
     public ExchangeRateResponse findById(Long id) {
         ExchangeRate exchangeRate = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exchange rate not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Exchange rate not found"));
 
         return mapper.toResponse(exchangeRate);
     }
