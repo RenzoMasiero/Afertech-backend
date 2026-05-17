@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/afertech
+    url: jdbc:postgresql://127.0.0.1:5433/afertech
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -15,6 +15,7 @@ spring:
 
   flyway:
     enabled: true
+    baseline-on-migrate: true
 
 jwt:
   secret: local-dev-secret-12345678901234567890

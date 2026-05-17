@@ -3,7 +3,7 @@
 -- Create reminder_recipients table
 -- ==========================================
 
-CREATE TABLE reminder_recipients (
+CREATE TABLE IF NOT EXISTS reminder_recipients (
 
     id BIGSERIAL PRIMARY KEY,
 
