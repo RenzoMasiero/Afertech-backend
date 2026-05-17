@@ -1,11 +1,18 @@
 package com.facturacion.Afertech.service.impl;
 
+import com.facturacion.Afertech.dto.ExchangeRateRequest;
+import com.facturacion.Afertech.dto.ExchangeRateResponse;
+import com.facturacion.Afertech.mapper.ExchangeRateMapper;
 import com.facturacion.Afertech.model.ExchangeRate;
 import com.facturacion.Afertech.repository.ExchangeRateRepository;
 import com.facturacion.Afertech.service.ExchangeRateService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
@@ -14,15 +21,18 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     private static final long MAX_TOLERANCE_DAYS = 5;
 
     private final ExchangeRateRepository exchangeRateRepository;
+    private final ExchangeRateMapper exchangeRateMapper;
 
-    public ExchangeRateServiceImpl(ExchangeRateRepository exchangeRateRepository) {
+    public ExchangeRateServiceImpl(
+            ExchangeRateRepository exchangeRateRepository,
+            ExchangeRateMapper exchangeRateMapper
+    ) {
         this.exchangeRateRepository = exchangeRateRepository;
+        this.exchangeRateMapper = exchangeRateMapper;
     }
 
     @Override
     public ExchangeRate getByDate(LocalDate date) {
-
-        // 1️⃣ Exact match
         return exchangeRateRepository
                 .findByDateAndDeletedAtIsNull(date)
                 .orElseGet(() -> resolveLatestBeforeOrEqual(date));
@@ -31,6 +41,58 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     @Override
     public ExchangeRate getLatestBeforeOrEqual(LocalDate date) {
         return resolveLatestBeforeOrEqual(date);
+    }
+
+    @Override
+    public Page<ExchangeRateResponse> findAll(Pageable pageable) {
+        return exchangeRateRepository.findAll(pageable)
+                .map(exchangeRateMapper::toResponse);
+    }
+
+    @Override
+    public ExchangeRateResponse findById(Long id) {
+        ExchangeRate exchangeRate = exchangeRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exchange rate not found"));
+        return exchangeRateMapper.toResponse(exchangeRate);
+    }
+
+    @Override
+    public ExchangeRateResponse create(ExchangeRateRequest request) {
+        if (exchangeRateRepository.existsByDateAndDeletedAtIsNull(request.getDate())) {
+            throw new IllegalStateException("Exchange rate already exists for date: " + request.getDate());
+        }
+
+        ExchangeRate exchangeRate = exchangeRateMapper.toEntity(request);
+        exchangeRate.setLoadedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        return exchangeRateMapper.toResponse(exchangeRateRepository.save(exchangeRate));
+    }
+
+    @Override
+    public ExchangeRateResponse update(Long id, ExchangeRateRequest request) {
+        ExchangeRate exchangeRate = exchangeRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exchange rate not found"));
+
+        if (!exchangeRate.getDate().equals(request.getDate())
+                && exchangeRateRepository.existsByDateAndDeletedAtIsNull(request.getDate())) {
+            throw new IllegalStateException("Exchange rate already exists for date: " + request.getDate());
+        }
+
+        exchangeRate.setDate(request.getDate());
+        exchangeRate.setUsdArsRate(request.getUsdArsRate());
+
+        return exchangeRateMapper.toResponse(exchangeRateRepository.save(exchangeRate));
+    }
+
+    @Override
+    public void delete(Long id) {
+        ExchangeRate exchangeRate = exchangeRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exchange rate not found"));
+
+        exchangeRate.setDeletedAt(LocalDateTime.now());
+        exchangeRate.setDeletedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        exchangeRateRepository.save(exchangeRate);
     }
 
     private ExchangeRate resolveLatestBeforeOrEqual(LocalDate date) {
