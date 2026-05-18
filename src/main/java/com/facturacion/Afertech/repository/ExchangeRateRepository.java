@@ -8,10 +8,9 @@ import java.util.Optional;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
 
-    // Exact match (usado por getByDate)
     Optional<ExchangeRate> findByDateAndDeletedAtIsNull(LocalDate date);
 
-    // Optimizado: última anterior o igual (con soft delete)
-    Optional<ExchangeRate>
-    findTopByDateLessThanEqualAndDeletedAtIsNullOrderByDateDesc(LocalDate date);
+    Optional<ExchangeRate> findTopByDateLessThanEqualAndDeletedAtIsNullOrderByDateDesc(LocalDate date);
+
+    boolean existsByDateAndDeletedAtIsNull(LocalDate date);
 }
